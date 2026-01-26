@@ -18,11 +18,11 @@ type DisasterRepository interface {
 	Add(ctx context.Context, d *models.Disaster) error
 	GetByID(ctx context.Context, id string) (*models.Disaster, error)
 	Exists(ctx context.Context, id string) (bool, error)
-	List(ctx context.Context, opts Filter) ([]models.Disaster, error)
+	ListDisasters(ctx context.Context, opts Filter) ([]models.Disaster, error)
 }
 
 type AlertRepository interface {
-	Add(ctx context.Context, a *models.Alert) error
+	AddAlert(ctx context.Context, a *models.Alert) error
 	GetByDisasterID(ctx context.Context, disasterID string) ([]models.Alert, error)
-	List(ctx context.Context, opts Filter) ([]models.Alert, error)
+	ListAlerts(ctx context.Context, opts Filter) ([]models.Alert, error)
 }

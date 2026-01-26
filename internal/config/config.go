@@ -9,14 +9,20 @@ import (
 
 type Config struct {
 	Server  ServerConfig
+	Worker  WorkerConfig
 	Sources SourcesConfig
 	DB      DatabaseConfig
 	Logging LoggingConfig
 }
 
 type ServerConfig struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host string
+	Port int
+}
+
+type WorkerConfig struct {
+	Count      int
+	BufferSize int
 }
 
 type SourcesConfig struct {
@@ -41,6 +47,10 @@ func Load() (*Config, error) {
 		Server: ServerConfig{
 			Host: getEnv("SERVER_HOST", "localhost"),
 			Port: getEnvInt("SERVER_PORT", 8080),
+		},
+		Worker: WorkerConfig{
+			Count:      getEnvInt("WORKER_COUNT", 2),
+			BufferSize: getEnvInt("WORKER_BUFFER_SIZE", 20),
 		},
 		Sources: SourcesConfig{
 			USGSEnabled:       getEnvBool("USGS_ENABLED", true),

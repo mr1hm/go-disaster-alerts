@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+// Setup sets the minimum logging level for logs
+// that will actually be displayed
 func Setup(level string) {
 	var logLevel slog.Level
 	switch level {

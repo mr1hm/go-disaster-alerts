@@ -65,7 +65,7 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 
 		d := &models.Disaster{
 			ID:          "gdacs_" + item.EventID,
-			Source:      "gdacs",
+			Source:      "GDACS",
 			Type:        disasterType,
 			Title:       item.Title,
 			Description: item.Description,

@@ -58,7 +58,7 @@ func (m *Manager) pollUSGS(ctx context.Context, url string) ([]*models.Disaster,
 	for _, f := range data.Features {
 		d := &models.Disaster{
 			ID:          "usgs_" + f.ID,
-			Source:      "usgs",
+			Source:      "USGS",
 			Type:        models.DisasterTypeEarthquake,
 			Title:       f.Properties.Title,
 			Description: f.Properties.Place,

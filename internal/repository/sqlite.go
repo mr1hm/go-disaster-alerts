@@ -120,6 +120,10 @@ func (s *SQLiteDB) ListDisasters(ctx context.Context, opts Filter) ([]models.Dis
 		conditions = append(conditions, "timestamp >= ?")
 		args = append(args, *opts.Since)
 	}
+	if opts.MinMagnitude != nil {
+		conditions = append(conditions, "magnitude >= ?")
+		args = append(args, *opts.MinMagnitude)
+	}
 
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")

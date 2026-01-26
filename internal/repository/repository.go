@@ -8,10 +8,11 @@ import (
 )
 
 type Filter struct {
-	Limit  int
-	Offset int
-	Since  *time.Time
-	Type   *models.DisasterType
+	Limit        int
+	Offset       int
+	Since        *time.Time
+	Type         *models.DisasterType
+	MinMagnitude *float64
 }
 
 type DisasterRepository interface {

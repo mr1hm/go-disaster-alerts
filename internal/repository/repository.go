@@ -13,6 +13,7 @@ type Filter struct {
 	Since        *time.Time
 	Type         *models.DisasterType
 	MinMagnitude *float64
+	AlertLevel   *string
 }
 
 type DisasterRepository interface {

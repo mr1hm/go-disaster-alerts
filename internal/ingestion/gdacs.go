@@ -82,6 +82,7 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 			Title:       item.Title,
 			Description: item.Description,
 			Magnitude:   parseSeverity(item.Severity),
+			AlertLevel:  strings.ToLower(item.AlertLevel),
 			Latitude:    lat,
 			Longitude:   lon,
 			Timestamp:   timestamp,

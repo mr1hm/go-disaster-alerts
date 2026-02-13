@@ -7,22 +7,25 @@ import (
 	"time"
 
 	"github.com/mr1hm/go-disaster-alerts/internal/config"
+	internalgrpc "github.com/mr1hm/go-disaster-alerts/internal/grpc"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 	"github.com/mr1hm/go-disaster-alerts/internal/repository"
 	"github.com/mr1hm/go-disaster-alerts/internal/worker"
 )
 
 type Manager struct {
-	cfg  *config.Config
-	repo repository.DisasterRepository
-	pool *worker.WorkerPool
-	wg   sync.WaitGroup
+	cfg         *config.Config
+	repo        repository.DisasterRepository
+	broadcaster *internalgrpc.Broadcaster
+	pool        *worker.WorkerPool
+	wg          sync.WaitGroup
 }
 
-func NewManager(cfg *config.Config, repo repository.DisasterRepository) *Manager {
+func NewManager(cfg *config.Config, repo repository.DisasterRepository, broadcaster *internalgrpc.Broadcaster) *Manager {
 	return &Manager{
-		cfg:  cfg,
-		repo: repo,
+		cfg:         cfg,
+		repo:        repo,
+		broadcaster: broadcaster,
 	}
 }
 
@@ -42,6 +45,11 @@ func (m *Manager) Start(ctx context.Context) {
 		if err := m.repo.Add(ctx, disaster); err != nil {
 			slog.Error("error adding disaster", "id", disaster.ID, "error", err)
 			return err
+		}
+
+		// Broadcast to gRPC stream subscribers if disaster meets criteria
+		if m.broadcaster != nil && shouldBroadcast(disaster) {
+			m.broadcaster.Broadcast(disaster)
 		}
 
 		slog.Info("added disaster", "id", disaster.ID, "type", disaster.Type, "source", disaster.Source)
@@ -115,4 +123,14 @@ func (m *Manager) Stop() {
 	m.wg.Wait()
 	m.pool.Stop()
 	slog.Info("ingestion manager stopped")
+}
+
+// shouldBroadcast returns true if disaster meets streaming criteria:
+// - Earthquakes: magnitude >= 5.0
+// - Other disasters: alert_level is "orange" or "red"
+func shouldBroadcast(d *models.Disaster) bool {
+	if d.Type == models.DisasterTypeEarthquake {
+		return d.Magnitude >= 5.0
+	}
+	return d.AlertLevel == "orange" || d.AlertLevel == "red"
 }

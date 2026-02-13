@@ -78,7 +78,7 @@ func TestManager_StartStop(t *testing.T) {
 	}
 
 	repo := newMockRepo()
-	mgr := NewManager(cfg, repo)
+	mgr := NewManager(cfg, repo, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -108,7 +108,7 @@ func TestManager_ConcurrentSubmit(t *testing.T) {
 	}
 
 	repo := newMockRepo()
-	mgr := NewManager(cfg, repo)
+	mgr := NewManager(cfg, repo, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	mgr.Start(ctx)
@@ -164,7 +164,7 @@ func TestManager_GracefulShutdown(t *testing.T) {
 	}
 
 	repo := newMockRepo()
-	mgr := NewManager(cfg, repo)
+	mgr := NewManager(cfg, repo, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	mgr.Start(ctx)
@@ -213,7 +213,7 @@ func TestManager_RaceCondition(t *testing.T) {
 	}
 
 	repo := newMockRepo()
-	mgr := NewManager(cfg, repo)
+	mgr := NewManager(cfg, repo, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	mgr.Start(ctx)

@@ -49,6 +49,9 @@ func (h *Handler) getDisasters(c *gin.Context) {
 			filter.Limit = lim
 		}
 	}
+	if al := c.Query("alert_level"); al != "" {
+		filter.AlertLevel = &al
+	}
 
 	disasters, err := h.repo.ListDisasters(c.Request.Context(), filter)
 	if err != nil {

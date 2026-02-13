@@ -21,7 +21,8 @@ type Disaster struct {
 	Type        DisasterType
 	Title       string
 	Description string
-	Magnitude   float64 // Richter scale for earthquakes, severity for others
+	Magnitude   float64 // Richter scale for earthquakes
+	AlertLevel  string  // "green", "orange", "red" (GDACS alert level) for disasters other than earthquake
 	Latitude    float64
 	Longitude   float64
 	Timestamp   time.Time // when the event occurred

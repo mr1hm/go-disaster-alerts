@@ -32,6 +32,7 @@ func toGeoJSON(disasters []models.Disaster) FeatureCollection {
 				"title":       d.Title,
 				"description": d.Description,
 				"magnitude":   d.Magnitude,
+				"alert_level": d.AlertLevel,
 				"source":      d.Source,
 				"timestamp":   d.Timestamp,
 			},

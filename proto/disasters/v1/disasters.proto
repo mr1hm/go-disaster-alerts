@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package disasters.v1;
+
+option go_package = "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1";
+
+service DisasterService {
+    rpc GetDisaster(GetDisasterRequest) returns (Disaster);
+    rpc ListDisasters(ListDisastersRequest) returns (ListDisastersResponse);
+    rpc StreamDisasters(StreamDisastersRequest) returns (stream Disaster);
+}
+
+message GetDisasterRequest {
+    string id = 1;
+}
+
+message Disaster {
+    string id = 1;
+    string source = 2;
+    string type = 3;
+    string title = 4;
+    double magnitude = 5;
+    string alert_level = 6;
+    double latitude = 7;
+    double longitude = 8;
+    int64 timestamp = 9;
+}
+
+message ListDisastersRequest {
+    int32 limit = 1;
+    optional string type = 2;
+    optional double min_magnitude = 3;
+    optional string alert_level = 4;
+}
+
+message ListDisastersResponse {
+    repeated Disaster disasters = 1;
+}
+
+message StreamDisastersRequest {
+    optional string type = 1;
+    optional double min_magnitude = 2;
+    optional string alert_level = 3;
+}

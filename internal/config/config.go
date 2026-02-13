@@ -9,10 +9,15 @@ import (
 
 type Config struct {
 	Server  ServerConfig
+	GRPC    GRPCConfig
 	Worker  WorkerConfig
 	Sources SourcesConfig
 	DB      DatabaseConfig
 	Logging LoggingConfig
+}
+
+type GRPCConfig struct {
+	Port int
 }
 
 type ServerConfig struct {
@@ -47,6 +52,9 @@ func Load() (*Config, error) {
 		Server: ServerConfig{
 			Host: getEnv("SERVER_HOST", "localhost"),
 			Port: getEnvInt("SERVER_PORT", 8080),
+		},
+		GRPC: GRPCConfig{
+			Port: getEnvInt("GRPC_PORT", 50051),
 		},
 		Worker: WorkerConfig{
 			Count:      getEnvInt("WORKER_COUNT", 2),

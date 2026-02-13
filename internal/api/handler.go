@@ -27,7 +27,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 
 func (h *Handler) getDisasters(c *gin.Context) {
 	filter := repository.Filter{
-		Limit: 20,
+		Limit: 20, // Default to 20 disasters if limit param not supplied
 	}
 
 	if t := c.Query("type"); t != "" {

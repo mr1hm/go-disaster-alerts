@@ -11,6 +11,7 @@ const (
 	DisasterTypeTsunami    DisasterType = "tsunami"
 	DisasterTypeVolcano    DisasterType = "volcano"
 	DisasterTypeWildfire   DisasterType = "wildfire"
+	DisasterTypeDrought    DisasterType = "drought"
 	DisasterTypeUnknown    DisasterType = "unknown"
 )
 

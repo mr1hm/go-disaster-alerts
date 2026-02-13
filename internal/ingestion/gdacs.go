@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,16 +20,15 @@ type gdacsChannel struct {
 	Items []gdacsItem `xml:"item"`
 }
 type gdacsItem struct {
-	Title       string  `xml:"title"`
-	Description string  `xml:"description"`
-	Link        string  `xml:"link"`
-	PubDate     string  `xml:"pubDate"`
-	Lat         float64 `xml:"http://www.georss.org/georss point>lat"`
-	Lon         float64 `xml:"http://www.georss.org/georss point>lon"`
-	EventType   string  `xml:"http://www.gdacs.org gdacs>eventtype"`
-	AlertLevel  string  `xml:"http://www.gdacs.org gdacs>alertlevel"`
-	EventID     string  `xml:"http://www.gdacs.org gdacs>eventid"`
-	Severity    float64 `xml:"http://www.gdacs.org gdacs>severity"`
+	Title       string `xml:"title"`
+	Description string `xml:"description"`
+	Link        string `xml:"link"`
+	PubDate     string `xml:"pubDate"`
+	Point       string `xml:"point"`      // "lat lon" format from georss:point
+	EventType   string `xml:"eventtype"`  // gdacs:eventtype
+	AlertLevel  string `xml:"alertlevel"` // gdacs:alertlevel
+	EventID     string `xml:"eventid"`    // gdacs:eventid
+	Severity    string `xml:"severity"`   // gdacs:severity - e.g. "Magnitude 5.6M, Depth:56.4km"
 }
 
 func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster, error) {
@@ -57,6 +57,18 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 
 	disasters := make([]*models.Disaster, 0, len(data.Channel.Items))
 	for _, item := range data.Channel.Items {
+		// Parse lat/lon from "lat lon" format
+		var lat, lon float64
+		if parts := strings.Fields(item.Point); len(parts) >= 2 {
+			lat, _ = strconv.ParseFloat(parts[0], 64)
+			lon, _ = strconv.ParseFloat(parts[1], 64)
+		}
+
+		// Skip items without valid ID
+		if item.EventID == "" {
+			continue
+		}
+
 		disasterType := mapGDACSEventType(item.EventType)
 		timestamp, err := time.Parse(time.RFC1123, item.PubDate)
 		if err != nil {
@@ -69,9 +81,9 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 			Type:        disasterType,
 			Title:       item.Title,
 			Description: item.Description,
-			Magnitude:   item.Severity,
-			Latitude:    item.Lat,
-			Longitude:   item.Lon,
+			Magnitude:   parseSeverity(item.Severity),
+			Latitude:    lat,
+			Longitude:   lon,
 			Timestamp:   timestamp,
 			CreatedAt:   time.Now(),
 		}
@@ -79,6 +91,19 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 	}
 
 	return disasters, nil
+}
+
+// parseSeverity extracts magnitude from strings like "Magnitude 5.6M, Depth:56.4km"
+func parseSeverity(severity string) float64 {
+	// Try to find a number after "Magnitude " or just extract first float
+	severity = strings.TrimPrefix(severity, "Magnitude ")
+	for _, part := range strings.Fields(severity) {
+		part = strings.TrimRight(part, "M,")
+		if mag, err := strconv.ParseFloat(part, 64); err == nil {
+			return mag
+		}
+	}
+	return 0
 }
 
 func mapGDACSEventType(eventType string) models.DisasterType {
@@ -95,6 +120,8 @@ func mapGDACSEventType(eventType string) models.DisasterType {
 		return models.DisasterTypeTsunami
 	case "WF":
 		return models.DisasterTypeWildfire
+	case "DR":
+		return models.DisasterTypeDrought
 	default:
 		return models.DisasterTypeUnknown
 	}

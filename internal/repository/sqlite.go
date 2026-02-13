@@ -19,8 +19,12 @@ func NewSQLiteDB(path string) (*SQLiteDB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
-	db.Exec("PRAGMA journal_mode=WAL")   // Write-ahead logging
-	db.Exec("PRAGMA synchronous=NORMAL") // Balance safety/speed
+
+	// SQLite optimizations
+	db.SetMaxOpenConns(1) // Prevent concurrent write locks
+	db.Exec("PRAGMA journal_mode=WAL")
+	db.Exec("PRAGMA synchronous=NORMAL")
+	db.Exec("PRAGMA busy_timeout=5000") // Wait 5s on locks
 
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("error while pinging database: %w", err)

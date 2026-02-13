@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/mr1hm/go-disaster-alerts/internal/api"
@@ -46,6 +47,14 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(gin.Recovery())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false, // Set to false when using wildcard origins
+	}))
+	router.Use(api.RateLimitMiddleware(5)) // 5 req/s global limit
 
 	handler := api.NewHandler(db)
 	handler.RegisterRoutes(router)

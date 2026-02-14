@@ -7,6 +7,7 @@ import (
 
 	"go.uber.org/goleak"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 )
 
@@ -46,7 +47,7 @@ func TestBroadcaster_Broadcast(t *testing.T) {
 
 	disaster := &models.Disaster{
 		ID:        "test_1",
-		Type:      models.DisasterTypeEarthquake,
+		Type:      disastersv1.DisasterType_EARTHQUAKE,
 		Magnitude: 6.5,
 	}
 

@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/config"
 	internalgrpc "github.com/mr1hm/go-disaster-alerts/internal/grpc"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
@@ -127,10 +128,10 @@ func (m *Manager) Stop() {
 
 // shouldBroadcast returns true if disaster meets streaming criteria:
 // - Earthquakes: magnitude >= 5.0
-// - Other disasters: alert_level is "orange" or "red"
+// - Other disasters: alert_level is orange or red
 func shouldBroadcast(d *models.Disaster) bool {
-	if d.Type == models.DisasterTypeEarthquake {
+	if d.Type == disastersv1.DisasterType_EARTHQUAKE {
 		return d.Magnitude >= 5.0
 	}
-	return d.AlertLevel == "orange" || d.AlertLevel == "red"
+	return d.AlertLevel == disastersv1.AlertLevel_ORANGE || d.AlertLevel == disastersv1.AlertLevel_RED
 }

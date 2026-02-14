@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 )
 
@@ -82,7 +83,7 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 			Title:       item.Title,
 			Description: item.Description,
 			Magnitude:   parseSeverity(item.Severity),
-			AlertLevel:  strings.ToLower(item.AlertLevel),
+			AlertLevel:  mapGDACSAlertLevel(item.AlertLevel),
 			Latitude:    lat,
 			Longitude:   lon,
 			Timestamp:   timestamp,
@@ -107,23 +108,36 @@ func parseSeverity(severity string) float64 {
 	return 0
 }
 
-func mapGDACSEventType(eventType string) models.DisasterType {
+func mapGDACSEventType(eventType string) disastersv1.DisasterType {
 	switch strings.ToUpper(eventType) {
 	case "EQ":
-		return models.DisasterTypeEarthquake
+		return disastersv1.DisasterType_EARTHQUAKE
 	case "TC":
-		return models.DisasterTypeCyclone
+		return disastersv1.DisasterType_CYCLONE
 	case "FL":
-		return models.DisasterTypeFlood
+		return disastersv1.DisasterType_FLOOD
 	case "VO":
-		return models.DisasterTypeVolcano
+		return disastersv1.DisasterType_VOLCANO
 	case "TS":
-		return models.DisasterTypeTsunami
+		return disastersv1.DisasterType_TSUNAMI
 	case "WF":
-		return models.DisasterTypeWildfire
+		return disastersv1.DisasterType_WILDFIRE
 	case "DR":
-		return models.DisasterTypeDrought
+		return disastersv1.DisasterType_DROUGHT
 	default:
-		return models.DisasterTypeUnknown
+		return disastersv1.DisasterType_UNSPECIFIED
+	}
+}
+
+func mapGDACSAlertLevel(level string) disastersv1.AlertLevel {
+	switch strings.ToLower(level) {
+	case "green":
+		return disastersv1.AlertLevel_GREEN
+	case "orange":
+		return disastersv1.AlertLevel_ORANGE
+	case "red":
+		return disastersv1.AlertLevel_RED
+	default:
+		return disastersv1.AlertLevel_UNKNOWN
 	}
 }

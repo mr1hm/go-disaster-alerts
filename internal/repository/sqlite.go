@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 	_ "modernc.org/sqlite"
 )
@@ -45,11 +46,11 @@ func (s *SQLiteDB) migrate() error {
 		CREATE TABLE IF NOT EXISTS disasters (
 			id TEXT PRIMARY KEY,
 			source TEXT NOT NULL,
-			type TEXT NOT NULL,
+			type INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			description TEXT,
 			magnitude REAL,
-			alert_level TEXT DEFAULT '',
+			alert_level INTEGER DEFAULT 0,
 			latitude REAL NOT NULL,
 			longitude REAL NOT NULL,
 			timestamp DATETIME NOT NULL,
@@ -76,9 +77,6 @@ func (s *SQLiteDB) migrate() error {
 		return err
 	}
 
-	// Migration for existing databases
-	s.db.Exec("ALTER TABLE disasters ADD COLUMN alert_level TEXT DEFAULT ''")
-
 	return nil
 }
 
@@ -90,8 +88,8 @@ func (s *SQLiteDB) Add(ctx context.Context, d *models.Disaster) error {
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 	_, err := s.db.ExecContext(ctx, query,
-		d.ID, d.Source, d.Type, d.Title, d.Description,
-		d.Magnitude, d.AlertLevel, d.Latitude, d.Longitude, d.Timestamp, d.Raw, d.CreatedAt,
+		d.ID, d.Source, int32(d.Type), d.Title, d.Description,
+		d.Magnitude, int32(d.AlertLevel), d.Latitude, d.Longitude, d.Timestamp, d.Raw, d.CreatedAt,
 	)
 	return err
 }
@@ -100,9 +98,10 @@ func (s *SQLiteDB) GetByID(ctx context.Context, id string) (*models.Disaster, er
 	query := `SELECT id, source, type, title, description, magnitude, alert_level, latitude, longitude, timestamp, raw, created_at FROM disasters WHERE id = ?`
 
 	var d models.Disaster
+	var typeInt, alertLevelInt int32
 	err := s.db.QueryRowContext(ctx, query, id).Scan(
-		&d.ID, &d.Source, &d.Type, &d.Title, &d.Description,
-		&d.Magnitude, &d.AlertLevel, &d.Latitude, &d.Longitude, &d.Timestamp, &d.Raw, &d.CreatedAt,
+		&d.ID, &d.Source, &typeInt, &d.Title, &d.Description,
+		&d.Magnitude, &alertLevelInt, &d.Latitude, &d.Longitude, &d.Timestamp, &d.Raw, &d.CreatedAt,
 	)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -110,6 +109,8 @@ func (s *SQLiteDB) GetByID(ctx context.Context, id string) (*models.Disaster, er
 	if err != nil {
 		return nil, err
 	}
+	d.Type = disastersv1.DisasterType(typeInt)
+	d.AlertLevel = disastersv1.AlertLevel(alertLevelInt)
 	return &d, nil
 }
 
@@ -127,7 +128,7 @@ func (s *SQLiteDB) ListDisasters(ctx context.Context, opts Filter) ([]models.Dis
 
 	if opts.Type != nil {
 		conditions = append(conditions, "type = ?")
-		args = append(args, *opts.Type)
+		args = append(args, int32(*opts.Type))
 	}
 	if opts.Since != nil {
 		conditions = append(conditions, "timestamp >= ?")
@@ -139,7 +140,7 @@ func (s *SQLiteDB) ListDisasters(ctx context.Context, opts Filter) ([]models.Dis
 	}
 	if opts.AlertLevel != nil {
 		conditions = append(conditions, "alert_level = ?")
-		args = append(args, *opts.AlertLevel)
+		args = append(args, int32(*opts.AlertLevel))
 	}
 
 	if len(conditions) > 0 {
@@ -166,12 +167,15 @@ func (s *SQLiteDB) ListDisasters(ctx context.Context, opts Filter) ([]models.Dis
 	var disasters []models.Disaster
 	for rows.Next() {
 		var d models.Disaster
+		var typeInt, alertLevelInt int32
 		if err := rows.Scan(
-			&d.ID, &d.Source, &d.Type, &d.Title, &d.Description,
-			&d.Magnitude, &d.AlertLevel, &d.Latitude, &d.Longitude, &d.Timestamp, &d.Raw, &d.CreatedAt,
+			&d.ID, &d.Source, &typeInt, &d.Title, &d.Description,
+			&d.Magnitude, &alertLevelInt, &d.Latitude, &d.Longitude, &d.Timestamp, &d.Raw, &d.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
+		d.Type = disastersv1.DisasterType(typeInt)
+		d.AlertLevel = disastersv1.AlertLevel(alertLevelInt)
 		disasters = append(disasters, d)
 	}
 

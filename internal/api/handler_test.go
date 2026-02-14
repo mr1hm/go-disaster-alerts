@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 	"github.com/mr1hm/go-disaster-alerts/internal/repository"
 )
@@ -88,7 +89,7 @@ func TestGetDisasters_ReturnsGeoJSON(t *testing.T) {
 			{
 				ID:        "test_1",
 				Source:    "test",
-				Type:      models.DisasterTypeEarthquake,
+				Type:      disastersv1.DisasterType_EARTHQUAKE,
 				Title:     "Test Quake",
 				Magnitude: 5.5,
 				Latitude:  35.0,
@@ -132,9 +133,9 @@ func TestGetDisasters_ReturnsGeoJSON(t *testing.T) {
 func TestGetDisasters_TypeFilter(t *testing.T) {
 	repo := &mockRepo{
 		disasters: []models.Disaster{
-			{ID: "eq1", Type: models.DisasterTypeEarthquake, Timestamp: time.Now()},
-			{ID: "fl1", Type: models.DisasterTypeFlood, Timestamp: time.Now()},
-			{ID: "eq2", Type: models.DisasterTypeEarthquake, Timestamp: time.Now()},
+			{ID: "eq1", Type: disastersv1.DisasterType_EARTHQUAKE, Timestamp: time.Now()},
+			{ID: "fl1", Type: disastersv1.DisasterType_FLOOD, Timestamp: time.Now()},
+			{ID: "eq2", Type: disastersv1.DisasterType_EARTHQUAKE, Timestamp: time.Now()},
 		},
 	}
 

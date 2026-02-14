@@ -10,6 +10,7 @@ import (
 
 	"go.uber.org/goleak"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/config"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 	"github.com/mr1hm/go-disaster-alerts/internal/repository"
@@ -126,7 +127,7 @@ func TestManager_ConcurrentSubmit(t *testing.T) {
 				d := &models.Disaster{
 					ID:        fmt.Sprintf("test_%d_%d", goroutineID, j),
 					Source:    "test",
-					Type:      models.DisasterTypeEarthquake,
+					Type:      disastersv1.DisasterType_EARTHQUAKE,
 					Timestamp: time.Now(),
 					CreatedAt: time.Now(),
 				}
@@ -174,7 +175,7 @@ func TestManager_GracefulShutdown(t *testing.T) {
 		d := &models.Disaster{
 			ID:        fmt.Sprintf("shutdown_test_%d", i),
 			Source:    "test",
-			Type:      models.DisasterTypeFlood,
+			Type:      disastersv1.DisasterType_FLOOD,
 			Timestamp: time.Now(),
 			CreatedAt: time.Now(),
 		}
@@ -230,7 +231,7 @@ func TestManager_RaceCondition(t *testing.T) {
 				d := &models.Disaster{
 					ID:        fmt.Sprintf("race_%d_%d", id, j),
 					Source:    "test",
-					Type:      models.DisasterTypeEarthquake,
+					Type:      disastersv1.DisasterType_EARTHQUAKE,
 					Magnitude: float64(j),
 					Timestamp: time.Now(),
 					CreatedAt: time.Now(),

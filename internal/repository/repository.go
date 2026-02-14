@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 )
 
@@ -11,9 +12,9 @@ type Filter struct {
 	Limit        int
 	Offset       int
 	Since        *time.Time
-	Type         *models.DisasterType
+	Type         *disastersv1.DisasterType
 	MinMagnitude *float64
-	AlertLevel   *string
+	AlertLevel   *disastersv1.AlertLevel
 }
 
 type DisasterRepository interface {

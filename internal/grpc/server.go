@@ -67,14 +67,13 @@ func (s *Server) ListDisasters(ctx context.Context, req *disastersv1.ListDisaste
 	filter := repository.Filter{
 		Limit: int(req.Limit),
 	}
-	if req.Type != nil {
-		t := models.DisasterType(*req.Type)
-		filter.Type = &t
+	if req.Type != nil && *req.Type != disastersv1.DisasterType_UNSPECIFIED {
+		filter.Type = req.Type
 	}
 	if req.MinMagnitude != nil {
 		filter.MinMagnitude = req.MinMagnitude
 	}
-	if req.AlertLevel != nil {
+	if req.AlertLevel != nil && *req.AlertLevel != disastersv1.AlertLevel_UNKNOWN {
 		filter.AlertLevel = req.AlertLevel
 	}
 
@@ -109,14 +108,18 @@ func (s *Server) StreamDisasters(req *disastersv1.StreamDisastersRequest, stream
 			}
 
 			// Apply filters
-			if req.Type != nil && string(d.Type) != *req.Type {
-				continue
+			if req.Type != nil && *req.Type != disastersv1.DisasterType_UNSPECIFIED {
+				if d.Type != *req.Type {
+					continue
+				}
 			}
 			if req.MinMagnitude != nil && d.Magnitude < *req.MinMagnitude {
 				continue
 			}
-			if req.AlertLevel != nil && d.AlertLevel != *req.AlertLevel {
-				continue
+			if req.AlertLevel != nil && *req.AlertLevel != disastersv1.AlertLevel_UNKNOWN {
+				if d.AlertLevel != *req.AlertLevel {
+					continue
+				}
 			}
 
 			if err := stream.Send(toProto(d)); err != nil {
@@ -131,7 +134,7 @@ func toProto(d *models.Disaster) *disastersv1.Disaster {
 	return &disastersv1.Disaster{
 		Id:         d.ID,
 		Source:     d.Source,
-		Type:       string(d.Type),
+		Type:       d.Type,
 		Title:      d.Title,
 		Magnitude:  d.Magnitude,
 		AlertLevel: d.AlertLevel,

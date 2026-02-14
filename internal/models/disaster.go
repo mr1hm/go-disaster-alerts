@@ -1,28 +1,19 @@
 package models
 
-import "time"
+import (
+	"time"
 
-type DisasterType string
-
-const (
-	DisasterTypeEarthquake DisasterType = "earthquake"
-	DisasterTypeFlood      DisasterType = "flood"
-	DisasterTypeCyclone    DisasterType = "cyclone"
-	DisasterTypeTsunami    DisasterType = "tsunami"
-	DisasterTypeVolcano    DisasterType = "volcano"
-	DisasterTypeWildfire   DisasterType = "wildfire"
-	DisasterTypeDrought    DisasterType = "drought"
-	DisasterTypeUnknown    DisasterType = "unknown"
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 )
 
 type Disaster struct {
 	ID          string // Unique ID from source (e.g., "usgs_us7000abc")
 	Source      string // "USGS" or "GDACS"
-	Type        DisasterType
+	Type        disastersv1.DisasterType
 	Title       string
 	Description string
 	Magnitude   float64 // Richter scale for earthquakes
-	AlertLevel  string  // "green", "orange", "red" (GDACS alert level) for disasters other than earthquake
+	AlertLevel  disastersv1.AlertLevel
 	Latitude    float64
 	Longitude   float64
 	Timestamp   time.Time // when the event occurred

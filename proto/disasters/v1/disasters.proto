@@ -21,13 +21,33 @@ message GetDisasterRequest {
     string id = 1;
 }
 
+// DisasterType represents the category of disaster.
+enum DisasterType {
+    UNSPECIFIED = 0;
+    EARTHQUAKE = 1;
+    FLOOD = 2;
+    CYCLONE = 3;
+    TSUNAMI = 4;
+    VOLCANO = 5;
+    WILDFIRE = 6;
+    DROUGHT = 7;
+}
+
+// AlertLevel represents the severity level from GDACS.
+enum AlertLevel {
+    UNKNOWN = 0;
+    GREEN = 1;
+    ORANGE = 2;
+    RED = 3;
+}
+
 message Disaster {
     string id = 1;
     string source = 2;
-    string type = 3;
+    DisasterType type = 3;
     string title = 4;
     double magnitude = 5;
-    string alert_level = 6;
+    AlertLevel alert_level = 6;
     double latitude = 7;
     double longitude = 8;
     int64 timestamp = 9;
@@ -35,9 +55,9 @@ message Disaster {
 
 message ListDisastersRequest {
     int32 limit = 1;
-    optional string type = 2;
+    optional DisasterType type = 2;
     optional double min_magnitude = 3;
-    optional string alert_level = 4;
+    optional AlertLevel alert_level = 4;
 }
 
 message ListDisastersResponse {
@@ -45,7 +65,7 @@ message ListDisastersResponse {
 }
 
 message StreamDisastersRequest {
-    optional string type = 1;
+    optional DisasterType type = 1;
     optional double min_magnitude = 2;
-    optional string alert_level = 3;
+    optional AlertLevel alert_level = 3;
 }

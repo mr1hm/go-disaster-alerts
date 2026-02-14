@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 )
 
@@ -24,7 +25,7 @@ func TestSQLiteDB_AddAndGetDisaster(t *testing.T) {
 	disaster := &models.Disaster{
 		ID:        "test_123",
 		Source:    "test",
-		Type:      models.DisasterTypeEarthquake,
+		Type:      disastersv1.DisasterType_EARTHQUAKE,
 		Title:     "Test Earthquake",
 		Magnitude: 5.5,
 		Latitude:  35.0,
@@ -67,7 +68,7 @@ func TestSQLiteDB_Exists(t *testing.T) {
 	db.Add(ctx, &models.Disaster{
 		ID:        "exists_test",
 		Source:    "test",
-		Type:      models.DisasterTypeFlood,
+		Type:      disastersv1.DisasterType_FLOOD,
 		Timestamp: time.Now(),
 		CreatedAt: time.Now(),
 	})
@@ -90,16 +91,16 @@ func TestSQLiteDB_ListDisasters_WithFilters(t *testing.T) {
 
 	// Add test data
 	disasters := []*models.Disaster{
-		{ID: "eq1", Source: "test", Type: models.DisasterTypeEarthquake, Magnitude: 6.0, Timestamp: now, CreatedAt: now},
-		{ID: "eq2", Source: "test", Type: models.DisasterTypeEarthquake, Magnitude: 4.0, Timestamp: now, CreatedAt: now},
-		{ID: "fl1", Source: "test", Type: models.DisasterTypeFlood, Magnitude: 3.0, Timestamp: now, CreatedAt: now},
+		{ID: "eq1", Source: "test", Type: disastersv1.DisasterType_EARTHQUAKE, Magnitude: 6.0, Timestamp: now, CreatedAt: now},
+		{ID: "eq2", Source: "test", Type: disastersv1.DisasterType_EARTHQUAKE, Magnitude: 4.0, Timestamp: now, CreatedAt: now},
+		{ID: "fl1", Source: "test", Type: disastersv1.DisasterType_FLOOD, Magnitude: 3.0, Timestamp: now, CreatedAt: now},
 	}
 	for _, d := range disasters {
 		db.Add(ctx, d)
 	}
 
 	// Test type filter
-	eqType := models.DisasterTypeEarthquake
+	eqType := disastersv1.DisasterType_EARTHQUAKE
 	results, err := db.ListDisasters(ctx, Filter{Type: &eqType})
 	if err != nil {
 		t.Fatalf("ListDisasters failed: %v", err)
@@ -136,7 +137,7 @@ func TestSQLiteDB_DuplicateAdd(t *testing.T) {
 	disaster := &models.Disaster{
 		ID:        "dup_test",
 		Source:    "test",
-		Type:      models.DisasterTypeEarthquake,
+		Type:      disastersv1.DisasterType_EARTHQUAKE,
 		Timestamp: time.Now(),
 		CreatedAt: time.Now(),
 	}

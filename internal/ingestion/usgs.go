@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
 )
 
@@ -59,10 +60,11 @@ func (m *Manager) pollUSGS(ctx context.Context, url string) ([]*models.Disaster,
 		d := &models.Disaster{
 			ID:          "usgs_" + f.ID,
 			Source:      "USGS",
-			Type:        models.DisasterTypeEarthquake,
+			Type:        disastersv1.DisasterType_EARTHQUAKE,
 			Title:       f.Properties.Title,
 			Description: f.Properties.Place,
 			Magnitude:   f.Properties.Mag,
+			AlertLevel:  disastersv1.AlertLevel_UNKNOWN,
 			Longitude:   f.Geometry.Coordinates[0],
 			Latitude:    f.Geometry.Coordinates[1],
 			Timestamp:   time.UnixMilli(f.Properties.Time),

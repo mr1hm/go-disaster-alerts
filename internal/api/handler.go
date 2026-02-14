@@ -3,10 +3,11 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mr1hm/go-disaster-alerts/internal/models"
+	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/repository"
 )
 
@@ -31,8 +32,10 @@ func (h *Handler) getDisasters(c *gin.Context) {
 	}
 
 	if t := c.Query("type"); t != "" {
-		dt := models.DisasterType(t)
-		filter.Type = &dt
+		dt := parseDisasterType(t)
+		if dt != disastersv1.DisasterType_UNSPECIFIED {
+			filter.Type = &dt
+		}
 	}
 	if m := c.Query("min_magnitude"); m != "" {
 		if mag, err := strconv.ParseFloat(m, 64); err == nil {
@@ -50,7 +53,10 @@ func (h *Handler) getDisasters(c *gin.Context) {
 		}
 	}
 	if al := c.Query("alert_level"); al != "" {
-		filter.AlertLevel = &al
+		level := parseAlertLevel(al)
+		if level != disastersv1.AlertLevel_UNKNOWN {
+			filter.AlertLevel = &level
+		}
 	}
 
 	disasters, err := h.repo.ListDisasters(c.Request.Context(), filter)
@@ -68,4 +74,38 @@ func (h *Handler) getDisasters(c *gin.Context) {
 
 func (h *Handler) health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func parseDisasterType(s string) disastersv1.DisasterType {
+	switch strings.ToLower(s) {
+	case "earthquake":
+		return disastersv1.DisasterType_EARTHQUAKE
+	case "flood":
+		return disastersv1.DisasterType_FLOOD
+	case "cyclone":
+		return disastersv1.DisasterType_CYCLONE
+	case "tsunami":
+		return disastersv1.DisasterType_TSUNAMI
+	case "volcano":
+		return disastersv1.DisasterType_VOLCANO
+	case "wildfire":
+		return disastersv1.DisasterType_WILDFIRE
+	case "drought":
+		return disastersv1.DisasterType_DROUGHT
+	default:
+		return disastersv1.DisasterType_UNSPECIFIED
+	}
+}
+
+func parseAlertLevel(s string) disastersv1.AlertLevel {
+	switch strings.ToLower(s) {
+	case "green":
+		return disastersv1.AlertLevel_GREEN
+	case "orange":
+		return disastersv1.AlertLevel_ORANGE
+	case "red":
+		return disastersv1.AlertLevel_RED
+	default:
+		return disastersv1.AlertLevel_UNKNOWN
+	}
 }

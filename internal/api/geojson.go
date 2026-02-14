@@ -1,6 +1,10 @@
 package api
 
-import "github.com/mr1hm/go-disaster-alerts/internal/models"
+import (
+	"strings"
+
+	"github.com/mr1hm/go-disaster-alerts/internal/models"
+)
 
 type FeatureCollection struct {
 	Type     string    `json:"type"`
@@ -28,11 +32,11 @@ func toGeoJSON(disasters []models.Disaster) FeatureCollection {
 			},
 			Properties: map[string]any{
 				"id":          d.ID,
-				"type":        d.Type,
+				"type":        strings.ToLower(d.Type.String()),
 				"title":       d.Title,
 				"description": d.Description,
 				"magnitude":   d.Magnitude,
-				"alert_level": d.AlertLevel,
+				"alert_level": strings.ToLower(d.AlertLevel.String()),
 				"source":      d.Source,
 				"timestamp":   d.Timestamp,
 			},

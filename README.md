@@ -1,0 +1,139 @@
+# go-disaster-alerts
+
+A Go backend service that aggregates real-time disaster data from USGS and GDACS, providing both a REST API and gRPC streaming for live alerts.
+
+## Features
+
+- Polls USGS (earthquakes) and GDACS (earthquakes, floods, cyclones, tsunamis, volcanoes, wildfires, droughts)
+- REST API returning GeoJSON for map integration
+- gRPC streaming for real-time disaster notifications
+- SQLite storage with deduplication
+- Retry with exponential backoff for API resilience
+- Rate limiting and CORS middleware
+
+## Tech Stack
+
+- Go 1.25.6
+- Gin (HTTP router)
+- gRPC + Protocol Buffers
+- SQLite (via modernc.org/sqlite)
+
+## Setup
+
+```bash
+# Clone
+git clone https://github.com/mr1hm/go-disaster-alerts.git
+cd go-disaster-alerts
+
+# Install dependencies
+go mod download
+
+# Run
+go run ./cmd/disaster-alert
+```
+
+## Configuration
+
+Create a `.env` file:
+
+```env
+# Server
+HOST=localhost
+PORT=8080
+GRPC_PORT=50051
+
+# Database
+DB_PATH=./disasters.db
+
+# Sources
+USGS_ENABLED=true
+USGS_URL=https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson
+USGS_POLL_INTERVAL=5m
+
+GDACS_ENABLED=true
+GDACS_URL=https://www.gdacs.org/xml/rss.xml
+GDACS_POLL_INTERVAL=5m
+
+# Logging
+LOG_LEVEL=info
+```
+
+## REST API
+
+### GET /api/disasters
+
+Returns disasters as GeoJSON.
+
+Query params:
+- `type` - earthquake, flood, cyclone, tsunami, volcano, wildfire, drought
+- `min_magnitude` - minimum magnitude (e.g., 5.0)
+- `alert_level` - green, orange, red
+- `since` - date filter (YYYY-MM-DD)
+- `limit` - max results (default 20, max 500)
+
+```bash
+curl "http://localhost:8080/api/disasters?type=earthquake&min_magnitude=5.0"
+```
+
+### GET /health
+
+Health check endpoint.
+
+### POST /api/debug/test-disaster
+
+Broadcasts a test disaster to gRPC subscribers (not persisted to DB).
+
+```bash
+curl -X POST http://localhost:8080/api/debug/test-disaster
+```
+
+## gRPC Service
+
+Proto file: `proto/disasters/v1/disasters.proto`
+
+### RPCs
+
+- `GetDisaster(id)` - Get single disaster by ID
+- `ListDisasters(limit, type, min_magnitude, alert_level)` - Query disasters
+- `StreamDisasters(...)` - Server-side stream of new disasters
+
+### Streaming Example
+
+```bash
+grpcurl -plaintext -proto proto/disasters/v1/disasters.proto \
+  localhost:50051 disasters.v1.DisasterService/StreamDisasters
+```
+
+## Enums
+
+### DisasterType
+- UNSPECIFIED (0)
+- EARTHQUAKE (1)
+- FLOOD (2)
+- CYCLONE (3)
+- TSUNAMI (4)
+- VOLCANO (5)
+- WILDFIRE (6)
+- DROUGHT (7)
+
+### AlertLevel (GDACS)
+- UNKNOWN (0) - Used for USGS earthquakes
+- GREEN (1) - Minor impact
+- ORANGE (2) - Moderate impact
+- RED (3) - Severe, may need international aid
+
+## Development
+
+```bash
+# Run tests
+go test -race ./...
+
+# Regenerate proto
+protoc --go_out=. --go_opt=module=github.com/mr1hm/go-disaster-alerts \
+       --go-grpc_out=. --go-grpc_opt=module=github.com/mr1hm/go-disaster-alerts \
+       proto/disasters/v1/disasters.proto
+```
+
+## License
+
+MIT

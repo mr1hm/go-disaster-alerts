@@ -141,6 +141,23 @@ grpcurl -plaintext -proto proto/disasters/v1/disasters.proto \
   localhost:50051 disasters.v1.DisasterService/StreamDisasters
 ```
 
+## Disaster Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | string | Unique ID (e.g., `gdacs_12345`, `usgs_us7000abc`) |
+| source | string | `USGS` or `GDACS` |
+| type | DisasterType | Category of disaster |
+| title | string | Event title/summary |
+| magnitude | double | Richter scale (earthquakes) |
+| alert_level | AlertLevel | Severity level (GDACS only) |
+| latitude | double | Event latitude |
+| longitude | double | Event longitude |
+| timestamp | int64 | Unix timestamp of event |
+| country | string | Country where disaster occurred |
+| population | string | Affected population (e.g., "1 thousand (in MMI>=VII)") |
+| report_url | string | Link to detailed GDACS report |
+
 ## Enums
 
 ### DisasterType

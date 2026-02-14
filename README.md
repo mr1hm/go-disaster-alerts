@@ -2,6 +2,43 @@
 
 A Go backend service that aggregates real-time disaster data from USGS and GDACS, providing both a REST API and gRPC streaming for live alerts.
 
+## Architecture
+
+```
+┌─────────────┐     ┌─────────────┐
+│    USGS     │     │   GDACS     │
+│  (JSON API) │     │  (RSS/XML)  │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+       └─────────┬─────────┘
+                 │ poll (5m interval)
+                 ▼
+       ┌─────────────────────┐
+       │  Ingestion Manager  │
+       │  (retry + backoff)  │
+       └──────────┬──────────┘
+                  │
+         ┌────────┴────────┐
+         │                 │
+         ▼                 ▼
+   ┌──────────┐    ┌─────────────┐
+   │  SQLite  │    │ Broadcaster │
+   │   (DB)   │    │  (gRPC)     │
+   └────┬─────┘    └──────┬──────┘
+        │                 │
+        ▼                 ▼
+┌───────────────┐  ┌───────────────┐
+│   REST API    │  │ gRPC Stream   │
+│  (GeoJSON)    │  │ (real-time)   │
+└───────┬───────┘  └───────┬───────┘
+        │                  │
+        ▼                  ▼
+   ┌─────────┐      ┌─────────────┐
+   │ Web App │      │ Discord Bot │
+   │  (map)  │      │  (alerts)   │
+   └─────────┘      └─────────────┘
+```
+
 ## Features
 
 - Polls USGS (earthquakes) and GDACS (earthquakes, floods, cyclones, tsunamis, volcanoes, wildfires, droughts)

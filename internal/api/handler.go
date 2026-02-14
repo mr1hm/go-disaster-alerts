@@ -94,6 +94,9 @@ func (h *Handler) createTestDisaster(c *gin.Context) {
 		Latitude:    35.6762,
 		Longitude:   139.6503,
 		Timestamp:   time.Now(),
+		Country:     "Japan",
+		Population:  "50 thousand (in MMI>=VII)",
+		ReportURL:   "https://www.gdacs.org/report.aspx?eventtype=EQ&eventid=test",
 		CreatedAt:   time.Now(),
 	}
 

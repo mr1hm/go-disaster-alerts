@@ -9,8 +9,8 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      - HOST=0.0.0.0
-      - PORT=8080
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
       - GRPC_PORT=50051
       - DB_PATH=/app/data/disasters.db
       - USGS_ENABLED=false
@@ -23,4 +23,5 @@ services:
 
 networks:
   disaster-alerts-net:
+    name: disaster-alerts-net
     driver: bridge

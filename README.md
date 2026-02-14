@@ -43,7 +43,7 @@ PORT=8080
 GRPC_PORT=50051
 
 # Database
-DB_PATH=./disasters.db
+DB_PATH=./data/disasters.db
 
 # Sources
 USGS_ENABLED=true

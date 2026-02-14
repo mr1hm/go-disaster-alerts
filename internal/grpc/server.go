@@ -141,5 +141,8 @@ func toProto(d *models.Disaster) *disastersv1.Disaster {
 		Latitude:   d.Latitude,
 		Longitude:  d.Longitude,
 		Timestamp:  d.Timestamp.Unix(),
+		Country:    d.Country,
+		Population: d.Population,
+		ReportUrl:  d.ReportURL,
 	}
 }

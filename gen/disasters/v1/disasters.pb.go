@@ -194,6 +194,9 @@ type Disaster struct {
 	Latitude      float64                `protobuf:"fixed64,7,opt,name=latitude,proto3" json:"latitude,omitempty"`
 	Longitude     float64                `protobuf:"fixed64,8,opt,name=longitude,proto3" json:"longitude,omitempty"`
 	Timestamp     int64                  `protobuf:"varint,9,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Country       string                 `protobuf:"bytes,10,opt,name=country,proto3" json:"country,omitempty"`
+	Population    string                 `protobuf:"bytes,11,opt,name=population,proto3" json:"population,omitempty"`
+	ReportUrl     string                 `protobuf:"bytes,12,opt,name=report_url,json=reportUrl,proto3" json:"report_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -289,6 +292,27 @@ func (x *Disaster) GetTimestamp() int64 {
 		return x.Timestamp
 	}
 	return 0
+}
+
+func (x *Disaster) GetCountry() string {
+	if x != nil {
+		return x.Country
+	}
+	return ""
+}
+
+func (x *Disaster) GetPopulation() string {
+	if x != nil {
+		return x.Population
+	}
+	return ""
+}
+
+func (x *Disaster) GetReportUrl() string {
+	if x != nil {
+		return x.ReportUrl
+	}
+	return ""
 }
 
 type ListDisastersRequest struct {
@@ -469,7 +493,7 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"\n" +
 	"\"proto/disasters/v1/disasters.proto\x12\fdisasters.v1\"$\n" +
 	"\x12GetDisasterRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xa9\x02\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x82\x03\n" +
 	"\bDisaster\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06source\x18\x02 \x01(\tR\x06source\x12.\n" +
@@ -480,7 +504,14 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"alertLevel\x12\x1a\n" +
 	"\blatitude\x18\a \x01(\x01R\blatitude\x12\x1c\n" +
 	"\tlongitude\x18\b \x01(\x01R\tlongitude\x12\x1c\n" +
-	"\ttimestamp\x18\t \x01(\x03R\ttimestamp\"\xf6\x01\n" +
+	"\ttimestamp\x18\t \x01(\x03R\ttimestamp\x12\x18\n" +
+	"\acountry\x18\n" +
+	" \x01(\tR\acountry\x12\x1e\n" +
+	"\n" +
+	"population\x18\v \x01(\tR\n" +
+	"population\x12\x1d\n" +
+	"\n" +
+	"report_url\x18\f \x01(\tR\treportUrl\"\xf6\x01\n" +
 	"\x14ListDisastersRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x123\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1a.disasters.v1.DisasterTypeH\x00R\x04type\x88\x01\x01\x12(\n" +

@@ -30,6 +30,8 @@ type gdacsItem struct {
 	AlertLevel  string `xml:"alertlevel"` // gdacs:alertlevel
 	EventID     string `xml:"eventid"`    // gdacs:eventid
 	Severity    string `xml:"severity"`   // gdacs:severity - e.g. "Magnitude 5.6M, Depth:56.4km"
+	Country     string `xml:"country"`    // gdacs:country
+	Population  string `xml:"population"` // gdacs:population - e.g. "1 thousand (in MMI>=VII)"
 }
 
 func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster, error) {
@@ -87,6 +89,9 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 			Latitude:    lat,
 			Longitude:   lon,
 			Timestamp:   timestamp,
+			Country:     item.Country,
+			Population:  item.Population,
+			ReportURL:   item.Link,
 			CreatedAt:   time.Now(),
 		}
 		disasters = append(disasters, d)

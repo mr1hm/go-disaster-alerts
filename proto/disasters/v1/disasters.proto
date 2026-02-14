@@ -51,6 +51,9 @@ message Disaster {
     double latitude = 7;
     double longitude = 8;
     int64 timestamp = 9;
+    string country = 10;
+    string population = 11;
+    string report_url = 12;
 }
 
 message ListDisastersRequest {

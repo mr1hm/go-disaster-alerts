@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -8,22 +9,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
+	internalgrpc "github.com/mr1hm/go-disaster-alerts/internal/grpc"
+	"github.com/mr1hm/go-disaster-alerts/internal/models"
 	"github.com/mr1hm/go-disaster-alerts/internal/repository"
 )
 
 type Handler struct {
-	repo repository.DisasterRepository
+	repo        repository.DisasterRepository
+	broadcaster *internalgrpc.Broadcaster
 }
 
-func NewHandler(repo repository.DisasterRepository) *Handler {
+func NewHandler(repo repository.DisasterRepository, broadcaster *internalgrpc.Broadcaster) *Handler {
 	return &Handler{
-		repo: repo,
+		repo:        repo,
+		broadcaster: broadcaster,
 	}
 }
 
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/api/disasters", h.getDisasters)
 	r.GET("/health", h.health)
+	r.POST("/api/debug/test-disaster", h.createTestDisaster)
 }
 
 func (h *Handler) getDisasters(c *gin.Context) {
@@ -74,6 +80,32 @@ func (h *Handler) getDisasters(c *gin.Context) {
 
 func (h *Handler) health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func (h *Handler) createTestDisaster(c *gin.Context) {
+	disaster := &models.Disaster{
+		ID:          fmt.Sprintf("test_%d", time.Now().UnixNano()),
+		Source:      "TEST",
+		Type:        disastersv1.DisasterType_EARTHQUAKE,
+		Title:       "Test Earthquake - M7.5",
+		Description: "This is a test disaster for debugging",
+		Magnitude:   7.5,
+		AlertLevel:  disastersv1.AlertLevel_RED,
+		Latitude:    35.6762,
+		Longitude:   139.6503,
+		Timestamp:   time.Now(),
+		CreatedAt:   time.Now(),
+	}
+
+	// Broadcast only - don't persist test data to DB
+	if h.broadcaster != nil {
+		h.broadcaster.Broadcast(disaster)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "test disaster broadcast (not persisted)",
+		"id":      disaster.ID,
+	})
 }
 
 func parseDisasterType(s string) disastersv1.DisasterType {

@@ -78,7 +78,7 @@ func (m *mockRepo) ListDisasters(ctx context.Context, opts repository.Filter) ([
 func setupTestRouter(repo repository.DisasterRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	handler := NewHandler(repo)
+	handler := NewHandler(repo, nil)
 	handler.RegisterRoutes(router)
 	return router
 }

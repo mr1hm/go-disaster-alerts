@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	disastersv1 "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1"
 	"github.com/mr1hm/go-disaster-alerts/internal/config"
 	internalgrpc "github.com/mr1hm/go-disaster-alerts/internal/grpc"
 	"github.com/mr1hm/go-disaster-alerts/internal/models"
@@ -34,22 +33,13 @@ func (m *Manager) Start(ctx context.Context) {
 	processor := func(ctx context.Context, job worker.Job) error {
 		disaster := job.(*models.Disaster)
 
-		exists, err := m.repo.Exists(ctx, disaster.ID)
-		if err != nil {
-			slog.Error("error checking existence", "id", disaster.ID, "error", err)
-			return err
-		}
-		if exists {
-			return nil
-		}
-
 		if err := m.repo.Add(ctx, disaster); err != nil {
 			slog.Error("error adding disaster", "id", disaster.ID, "error", err)
 			return err
 		}
 
-		// Broadcast to gRPC stream subscribers if disaster meets criteria
-		if m.broadcaster != nil && shouldBroadcast(disaster) {
+		// Broadcast to gRPC stream subscribers
+		if m.broadcaster != nil {
 			m.broadcaster.Broadcast(disaster)
 		}
 
@@ -102,22 +92,58 @@ func (m *Manager) poll(ctx context.Context, source, url string) {
 		err       error
 	)
 
-	switch source {
-	case "usgs":
-		disasters, err = m.pollUSGS(ctx, url)
-	case "gdacs":
-		disasters, err = m.pollGDACS(ctx, url)
+	for attempt := 0; attempt < 5; attempt++ {
+		switch source {
+		case "usgs":
+			disasters, err = m.pollUSGS(ctx, url)
+		case "gdacs":
+			disasters, err = m.pollGDACS(ctx, url)
+		}
+
+		if err == nil {
+			break
+		}
+
+		if attempt < 4 {
+			backoff := time.Duration(1<<attempt) * time.Second
+			slog.Warn("poll failed, retrying", "source", source, "attempt", attempt+1, "backoff", backoff, "error", err)
+
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(backoff):
+			}
+		}
 	}
+
 	if err != nil {
-		slog.Error("poll failed", "source", source, "error", err)
+		slog.Error("poll failed after 5 attempts", "source", source, "error", err)
 		return
 	}
 
+	// Filter out existing disasters before submitting
+	var newDisasters []*models.Disaster
 	for _, d := range disasters {
+		exists, err := m.repo.Exists(ctx, d.ID)
+		if err != nil {
+			slog.Error("error checking existence", "id", d.ID, "error", err)
+			continue
+		}
+		if !exists {
+			newDisasters = append(newDisasters, d)
+		}
+	}
+
+	if len(newDisasters) == 0 {
+		slog.Info("no new disaster alerts found", "source", source)
+		return
+	}
+
+	for _, d := range newDisasters {
 		m.pool.Submit(d)
 	}
 
-	slog.Debug("poll complete", "source", source, "count", len(disasters))
+	slog.Debug("poll complete", "source", source, "count", len(newDisasters))
 }
 
 func (m *Manager) Stop() {
@@ -126,12 +152,3 @@ func (m *Manager) Stop() {
 	slog.Info("ingestion manager stopped")
 }
 
-// shouldBroadcast returns true if disaster meets streaming criteria:
-// - Earthquakes: magnitude >= 5.0
-// - Other disasters: alert_level is orange or red
-func shouldBroadcast(d *models.Disaster) bool {
-	if d.Type == disastersv1.DisasterType_EARTHQUAKE {
-		return d.Magnitude >= 5.0
-	}
-	return d.AlertLevel == disastersv1.AlertLevel_ORANGE || d.AlertLevel == disastersv1.AlertLevel_RED
-}

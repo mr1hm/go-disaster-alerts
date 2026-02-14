@@ -70,7 +70,7 @@ func main() {
 	}))
 	router.Use(api.RateLimitMiddleware(5)) // 5 req/s global limit
 
-	handler := api.NewHandler(db)
+	handler := api.NewHandler(db, broadcaster)
 	handler.RegisterRoutes(router)
 
 	srv := &http.Server{

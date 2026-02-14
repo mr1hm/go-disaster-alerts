@@ -1,0 +1,26 @@
+services:
+  disaster-alerts:
+    build: .
+    container_name: disaster-alerts
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+      - "50051:50051"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      - GRPC_PORT=50051
+      - DB_PATH=/app/data/disasters.db
+      - USGS_ENABLED=false
+      - USGS_POLL_INTERVAL=5m
+      - GDACS_ENABLED=true
+      - GDACS_POLL_INTERVAL=5m
+      - LOG_LEVEL=info
+    networks:
+      - disaster-alerts-net
+
+networks:
+  disaster-alerts-net:
+    driver: bridge

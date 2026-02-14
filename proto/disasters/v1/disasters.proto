@@ -4,9 +4,16 @@ package disasters.v1;
 
 option go_package = "github.com/mr1hm/go-disaster-alerts/gen/disasters/v1";
 
+// DisasterService provides access to global disaster data from USGS and GDACS.
 service DisasterService {
+    // GetDisaster retrieves a single disaster by its unique ID.
     rpc GetDisaster(GetDisasterRequest) returns (Disaster);
+
+    // ListDisasters returns a filtered list of disasters.
     rpc ListDisasters(ListDisastersRequest) returns (ListDisastersResponse);
+
+    // StreamDisasters opens a server-side stream that pushes new significant disasters in real-time.
+    // Only streams earthquakes >= 5.0 magnitude or other disasters with orange/red alert level.
     rpc StreamDisasters(StreamDisastersRequest) returns (stream Disaster);
 }
 

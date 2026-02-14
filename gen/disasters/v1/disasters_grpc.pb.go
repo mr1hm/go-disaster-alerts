@@ -27,9 +27,15 @@ const (
 // DisasterServiceClient is the client API for DisasterService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// DisasterService provides access to global disaster data from USGS and GDACS.
 type DisasterServiceClient interface {
+	// GetDisaster retrieves a single disaster by its unique ID.
 	GetDisaster(ctx context.Context, in *GetDisasterRequest, opts ...grpc.CallOption) (*Disaster, error)
+	// ListDisasters returns a filtered list of disasters.
 	ListDisasters(ctx context.Context, in *ListDisastersRequest, opts ...grpc.CallOption) (*ListDisastersResponse, error)
+	// StreamDisasters opens a server-side stream that pushes new significant disasters in real-time.
+	// Only streams earthquakes >= 5.0 magnitude or other disasters with orange/red alert level.
 	StreamDisasters(ctx context.Context, in *StreamDisastersRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Disaster], error)
 }
 
@@ -83,9 +89,15 @@ type DisasterService_StreamDisastersClient = grpc.ServerStreamingClient[Disaster
 // DisasterServiceServer is the server API for DisasterService service.
 // All implementations must embed UnimplementedDisasterServiceServer
 // for forward compatibility.
+//
+// DisasterService provides access to global disaster data from USGS and GDACS.
 type DisasterServiceServer interface {
+	// GetDisaster retrieves a single disaster by its unique ID.
 	GetDisaster(context.Context, *GetDisasterRequest) (*Disaster, error)
+	// ListDisasters returns a filtered list of disasters.
 	ListDisasters(context.Context, *ListDisastersRequest) (*ListDisastersResponse, error)
+	// StreamDisasters opens a server-side stream that pushes new significant disasters in real-time.
+	// Only streams earthquakes >= 5.0 magnitude or other disasters with orange/red alert level.
 	StreamDisasters(*StreamDisastersRequest, grpc.ServerStreamingServer[Disaster]) error
 	mustEmbedUnimplementedDisasterServiceServer()
 }

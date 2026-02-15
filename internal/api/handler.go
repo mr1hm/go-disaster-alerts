@@ -64,6 +64,12 @@ func (h *Handler) getDisasters(c *gin.Context) {
 			filter.AlertLevel = &level
 		}
 	}
+	if mal := c.Query("min_alert_level"); mal != "" {
+		level := parseAlertLevel(mal)
+		if level != disastersv1.AlertLevel_UNKNOWN {
+			filter.MinAlertLevel = &level
+		}
+	}
 
 	disasters, err := h.repo.ListDisasters(c.Request.Context(), filter)
 	if err != nil {

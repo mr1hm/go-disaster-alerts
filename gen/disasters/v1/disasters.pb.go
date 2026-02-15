@@ -321,6 +321,7 @@ type ListDisastersRequest struct {
 	Type          *DisasterType          `protobuf:"varint,2,opt,name=type,proto3,enum=disasters.v1.DisasterType,oneof" json:"type,omitempty"`
 	MinMagnitude  *float64               `protobuf:"fixed64,3,opt,name=min_magnitude,json=minMagnitude,proto3,oneof" json:"min_magnitude,omitempty"`
 	AlertLevel    *AlertLevel            `protobuf:"varint,4,opt,name=alert_level,json=alertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"alert_level,omitempty"`
+	MinAlertLevel *AlertLevel            `protobuf:"varint,5,opt,name=min_alert_level,json=minAlertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"min_alert_level,omitempty"` // >= this level (e.g., ORANGE includes ORANGE and RED)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -383,6 +384,13 @@ func (x *ListDisastersRequest) GetAlertLevel() AlertLevel {
 	return AlertLevel_UNKNOWN
 }
 
+func (x *ListDisastersRequest) GetMinAlertLevel() AlertLevel {
+	if x != nil && x.MinAlertLevel != nil {
+		return *x.MinAlertLevel
+	}
+	return AlertLevel_UNKNOWN
+}
+
 type ListDisastersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Disasters     []*Disaster            `protobuf:"bytes,1,rep,name=disasters,proto3" json:"disasters,omitempty"`
@@ -432,6 +440,7 @@ type StreamDisastersRequest struct {
 	Type          *DisasterType          `protobuf:"varint,1,opt,name=type,proto3,enum=disasters.v1.DisasterType,oneof" json:"type,omitempty"`
 	MinMagnitude  *float64               `protobuf:"fixed64,2,opt,name=min_magnitude,json=minMagnitude,proto3,oneof" json:"min_magnitude,omitempty"`
 	AlertLevel    *AlertLevel            `protobuf:"varint,3,opt,name=alert_level,json=alertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"alert_level,omitempty"`
+	MinAlertLevel *AlertLevel            `protobuf:"varint,4,opt,name=min_alert_level,json=minAlertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"min_alert_level,omitempty"` // >= this level (e.g., ORANGE includes ORANGE and RED)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -487,6 +496,13 @@ func (x *StreamDisastersRequest) GetAlertLevel() AlertLevel {
 	return AlertLevel_UNKNOWN
 }
 
+func (x *StreamDisastersRequest) GetMinAlertLevel() AlertLevel {
+	if x != nil && x.MinAlertLevel != nil {
+		return *x.MinAlertLevel
+	}
+	return AlertLevel_UNKNOWN
+}
+
 var File_proto_disasters_v1_disasters_proto protoreflect.FileDescriptor
 
 const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
@@ -511,26 +527,30 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"population\x18\v \x01(\tR\n" +
 	"population\x12\x1d\n" +
 	"\n" +
-	"report_url\x18\f \x01(\tR\treportUrl\"\xf6\x01\n" +
+	"report_url\x18\f \x01(\tR\treportUrl\"\xd1\x02\n" +
 	"\x14ListDisastersRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x123\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1a.disasters.v1.DisasterTypeH\x00R\x04type\x88\x01\x01\x12(\n" +
 	"\rmin_magnitude\x18\x03 \x01(\x01H\x01R\fminMagnitude\x88\x01\x01\x12>\n" +
 	"\valert_level\x18\x04 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x02R\n" +
-	"alertLevel\x88\x01\x01B\a\n" +
+	"alertLevel\x88\x01\x01\x12E\n" +
+	"\x0fmin_alert_level\x18\x05 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x03R\rminAlertLevel\x88\x01\x01B\a\n" +
 	"\x05_typeB\x10\n" +
 	"\x0e_min_magnitudeB\x0e\n" +
-	"\f_alert_level\"M\n" +
+	"\f_alert_levelB\x12\n" +
+	"\x10_min_alert_level\"M\n" +
 	"\x15ListDisastersResponse\x124\n" +
-	"\tdisasters\x18\x01 \x03(\v2\x16.disasters.v1.DisasterR\tdisasters\"\xe2\x01\n" +
+	"\tdisasters\x18\x01 \x03(\v2\x16.disasters.v1.DisasterR\tdisasters\"\xbd\x02\n" +
 	"\x16StreamDisastersRequest\x123\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x1a.disasters.v1.DisasterTypeH\x00R\x04type\x88\x01\x01\x12(\n" +
 	"\rmin_magnitude\x18\x02 \x01(\x01H\x01R\fminMagnitude\x88\x01\x01\x12>\n" +
 	"\valert_level\x18\x03 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x02R\n" +
-	"alertLevel\x88\x01\x01B\a\n" +
+	"alertLevel\x88\x01\x01\x12E\n" +
+	"\x0fmin_alert_level\x18\x04 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x03R\rminAlertLevel\x88\x01\x01B\a\n" +
 	"\x05_typeB\x10\n" +
 	"\x0e_min_magnitudeB\x0e\n" +
-	"\f_alert_level*|\n" +
+	"\f_alert_levelB\x12\n" +
+	"\x10_min_alert_level*|\n" +
 	"\fDisasterType\x12\x0f\n" +
 	"\vUNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +
@@ -581,20 +601,22 @@ var file_proto_disasters_v1_disasters_proto_depIdxs = []int32{
 	1,  // 1: disasters.v1.Disaster.alert_level:type_name -> disasters.v1.AlertLevel
 	0,  // 2: disasters.v1.ListDisastersRequest.type:type_name -> disasters.v1.DisasterType
 	1,  // 3: disasters.v1.ListDisastersRequest.alert_level:type_name -> disasters.v1.AlertLevel
-	3,  // 4: disasters.v1.ListDisastersResponse.disasters:type_name -> disasters.v1.Disaster
-	0,  // 5: disasters.v1.StreamDisastersRequest.type:type_name -> disasters.v1.DisasterType
-	1,  // 6: disasters.v1.StreamDisastersRequest.alert_level:type_name -> disasters.v1.AlertLevel
-	2,  // 7: disasters.v1.DisasterService.GetDisaster:input_type -> disasters.v1.GetDisasterRequest
-	4,  // 8: disasters.v1.DisasterService.ListDisasters:input_type -> disasters.v1.ListDisastersRequest
-	6,  // 9: disasters.v1.DisasterService.StreamDisasters:input_type -> disasters.v1.StreamDisastersRequest
-	3,  // 10: disasters.v1.DisasterService.GetDisaster:output_type -> disasters.v1.Disaster
-	5,  // 11: disasters.v1.DisasterService.ListDisasters:output_type -> disasters.v1.ListDisastersResponse
-	3,  // 12: disasters.v1.DisasterService.StreamDisasters:output_type -> disasters.v1.Disaster
-	10, // [10:13] is the sub-list for method output_type
-	7,  // [7:10] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	1,  // 4: disasters.v1.ListDisastersRequest.min_alert_level:type_name -> disasters.v1.AlertLevel
+	3,  // 5: disasters.v1.ListDisastersResponse.disasters:type_name -> disasters.v1.Disaster
+	0,  // 6: disasters.v1.StreamDisastersRequest.type:type_name -> disasters.v1.DisasterType
+	1,  // 7: disasters.v1.StreamDisastersRequest.alert_level:type_name -> disasters.v1.AlertLevel
+	1,  // 8: disasters.v1.StreamDisastersRequest.min_alert_level:type_name -> disasters.v1.AlertLevel
+	2,  // 9: disasters.v1.DisasterService.GetDisaster:input_type -> disasters.v1.GetDisasterRequest
+	4,  // 10: disasters.v1.DisasterService.ListDisasters:input_type -> disasters.v1.ListDisastersRequest
+	6,  // 11: disasters.v1.DisasterService.StreamDisasters:input_type -> disasters.v1.StreamDisastersRequest
+	3,  // 12: disasters.v1.DisasterService.GetDisaster:output_type -> disasters.v1.Disaster
+	5,  // 13: disasters.v1.DisasterService.ListDisasters:output_type -> disasters.v1.ListDisastersResponse
+	3,  // 14: disasters.v1.DisasterService.StreamDisasters:output_type -> disasters.v1.Disaster
+	12, // [12:15] is the sub-list for method output_type
+	9,  // [9:12] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_proto_disasters_v1_disasters_proto_init() }

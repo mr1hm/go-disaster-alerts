@@ -76,6 +76,9 @@ func (s *Server) ListDisasters(ctx context.Context, req *disastersv1.ListDisaste
 	if req.AlertLevel != nil && *req.AlertLevel != disastersv1.AlertLevel_UNKNOWN {
 		filter.AlertLevel = req.AlertLevel
 	}
+	if req.MinAlertLevel != nil && *req.MinAlertLevel != disastersv1.AlertLevel_UNKNOWN {
+		filter.MinAlertLevel = req.MinAlertLevel
+	}
 
 	disasters, err := s.repo.ListDisasters(ctx, filter)
 	if err != nil {
@@ -118,6 +121,11 @@ func (s *Server) StreamDisasters(req *disastersv1.StreamDisastersRequest, stream
 			}
 			if req.AlertLevel != nil && *req.AlertLevel != disastersv1.AlertLevel_UNKNOWN {
 				if d.AlertLevel != *req.AlertLevel {
+					continue
+				}
+			}
+			if req.MinAlertLevel != nil && *req.MinAlertLevel != disastersv1.AlertLevel_UNKNOWN {
+				if d.AlertLevel < *req.MinAlertLevel {
 					continue
 				}
 			}

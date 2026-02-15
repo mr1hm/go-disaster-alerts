@@ -9,12 +9,13 @@ import (
 )
 
 type Filter struct {
-	Limit        int
-	Offset       int
-	Since        *time.Time
-	Type         *disastersv1.DisasterType
-	MinMagnitude *float64
-	AlertLevel   *disastersv1.AlertLevel
+	Limit         int
+	Offset        int
+	Since         *time.Time
+	Type          *disastersv1.DisasterType
+	MinMagnitude  *float64
+	AlertLevel    *disastersv1.AlertLevel
+	MinAlertLevel *disastersv1.AlertLevel // >= this level (e.g., ORANGE includes ORANGE and RED)
 }
 
 type DisasterRepository interface {

@@ -61,6 +61,7 @@ message ListDisastersRequest {
     optional DisasterType type = 2;
     optional double min_magnitude = 3;
     optional AlertLevel alert_level = 4;
+    optional AlertLevel min_alert_level = 5; // >= this level (e.g., ORANGE includes ORANGE and RED)
 }
 
 message ListDisastersResponse {
@@ -71,4 +72,5 @@ message StreamDisastersRequest {
     optional DisasterType type = 1;
     optional double min_magnitude = 2;
     optional AlertLevel alert_level = 3;
+    optional AlertLevel min_alert_level = 4; // >= this level (e.g., ORANGE includes ORANGE and RED)
 }

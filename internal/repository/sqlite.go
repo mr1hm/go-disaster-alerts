@@ -147,6 +147,10 @@ func (s *SQLiteDB) ListDisasters(ctx context.Context, opts Filter) ([]models.Dis
 		conditions = append(conditions, "alert_level = ?")
 		args = append(args, int32(*opts.AlertLevel))
 	}
+	if opts.MinAlertLevel != nil {
+		conditions = append(conditions, "alert_level >= ?")
+		args = append(args, int32(*opts.MinAlertLevel))
+	}
 
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")

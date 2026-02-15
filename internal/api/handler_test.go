@@ -67,6 +67,28 @@ func (m *mockRepo) ListDisasters(ctx context.Context, opts repository.Filter) ([
 		results = filtered
 	}
 
+	// Apply alert level filter (exact match)
+	if opts.AlertLevel != nil {
+		var filtered []models.Disaster
+		for _, d := range results {
+			if d.AlertLevel == *opts.AlertLevel {
+				filtered = append(filtered, d)
+			}
+		}
+		results = filtered
+	}
+
+	// Apply min alert level filter (>= match)
+	if opts.MinAlertLevel != nil {
+		var filtered []models.Disaster
+		for _, d := range results {
+			if d.AlertLevel >= *opts.MinAlertLevel {
+				filtered = append(filtered, d)
+			}
+		}
+		results = filtered
+	}
+
 	// Apply limit
 	if opts.Limit > 0 && len(results) > opts.Limit {
 		results = results[:opts.Limit]
@@ -198,6 +220,73 @@ func TestGetDisasters_LimitFilter(t *testing.T) {
 
 	if len(fc.Features) != 3 {
 		t.Errorf("expected 3 disasters, got %d", len(fc.Features))
+	}
+}
+
+func TestGetDisasters_AlertLevelFilter(t *testing.T) {
+	repo := &mockRepo{
+		disasters: []models.Disaster{
+			{ID: "g1", AlertLevel: disastersv1.AlertLevel_GREEN, Timestamp: time.Now()},
+			{ID: "o1", AlertLevel: disastersv1.AlertLevel_ORANGE, Timestamp: time.Now()},
+			{ID: "r1", AlertLevel: disastersv1.AlertLevel_RED, Timestamp: time.Now()},
+		},
+	}
+
+	router := setupTestRouter(repo)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/disasters?alert_level=orange", nil)
+	router.ServeHTTP(w, req)
+
+	var fc FeatureCollection
+	json.Unmarshal(w.Body.Bytes(), &fc)
+
+	if len(fc.Features) != 1 {
+		t.Errorf("expected 1 orange alert, got %d", len(fc.Features))
+	}
+}
+
+func TestGetDisasters_MinAlertLevelFilter(t *testing.T) {
+	repo := &mockRepo{
+		disasters: []models.Disaster{
+			{ID: "g1", AlertLevel: disastersv1.AlertLevel_GREEN, Timestamp: time.Now()},
+			{ID: "g2", AlertLevel: disastersv1.AlertLevel_GREEN, Timestamp: time.Now()},
+			{ID: "o1", AlertLevel: disastersv1.AlertLevel_ORANGE, Timestamp: time.Now()},
+			{ID: "r1", AlertLevel: disastersv1.AlertLevel_RED, Timestamp: time.Now()},
+		},
+	}
+
+	router := setupTestRouter(repo)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/disasters?min_alert_level=orange", nil)
+	router.ServeHTTP(w, req)
+
+	var fc FeatureCollection
+	json.Unmarshal(w.Body.Bytes(), &fc)
+
+	if len(fc.Features) != 2 {
+		t.Errorf("expected 2 disasters (orange + red), got %d", len(fc.Features))
+	}
+}
+
+func TestCreateTestDisaster(t *testing.T) {
+	repo := &mockRepo{}
+	router := setupTestRouter(repo)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/debug/test-disaster", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+
+	var resp map[string]string
+	json.Unmarshal(w.Body.Bytes(), &resp)
+
+	if resp["message"] != "test disaster broadcast (not persisted)" {
+		t.Errorf("unexpected message: %s", resp["message"])
 	}
 }
 

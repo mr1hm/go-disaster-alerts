@@ -129,6 +129,96 @@ func TestSQLiteDB_ListDisasters_WithFilters(t *testing.T) {
 	}
 }
 
+func TestSQLiteDB_ListDisasters_AlertLevelFilters(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	ctx := context.Background()
+	now := time.Now()
+
+	// Add test data with different alert levels
+	disasters := []*models.Disaster{
+		{ID: "green1", Source: "test", Type: disastersv1.DisasterType_EARTHQUAKE, AlertLevel: disastersv1.AlertLevel_GREEN, Timestamp: now, CreatedAt: now},
+		{ID: "orange1", Source: "test", Type: disastersv1.DisasterType_FLOOD, AlertLevel: disastersv1.AlertLevel_ORANGE, Timestamp: now, CreatedAt: now},
+		{ID: "red1", Source: "test", Type: disastersv1.DisasterType_CYCLONE, AlertLevel: disastersv1.AlertLevel_RED, Timestamp: now, CreatedAt: now},
+		{ID: "green2", Source: "test", Type: disastersv1.DisasterType_EARTHQUAKE, AlertLevel: disastersv1.AlertLevel_GREEN, Timestamp: now, CreatedAt: now},
+	}
+	for _, d := range disasters {
+		db.Add(ctx, d)
+	}
+
+	// Test exact AlertLevel filter
+	orange := disastersv1.AlertLevel_ORANGE
+	results, err := db.ListDisasters(ctx, Filter{AlertLevel: &orange})
+	if err != nil {
+		t.Fatalf("ListDisasters failed: %v", err)
+	}
+	if len(results) != 1 {
+		t.Errorf("expected 1 orange alert, got %d", len(results))
+	}
+
+	// Test MinAlertLevel filter (>= ORANGE should return ORANGE and RED)
+	results, err = db.ListDisasters(ctx, Filter{MinAlertLevel: &orange})
+	if err != nil {
+		t.Fatalf("ListDisasters failed: %v", err)
+	}
+	if len(results) != 2 {
+		t.Errorf("expected 2 disasters with alert >= ORANGE, got %d", len(results))
+	}
+
+	// Test MinAlertLevel RED (should return only RED)
+	red := disastersv1.AlertLevel_RED
+	results, err = db.ListDisasters(ctx, Filter{MinAlertLevel: &red})
+	if err != nil {
+		t.Fatalf("ListDisasters failed: %v", err)
+	}
+	if len(results) != 1 {
+		t.Errorf("expected 1 disaster with alert >= RED, got %d", len(results))
+	}
+}
+
+func TestSQLiteDB_NewFields(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	ctx := context.Background()
+	disaster := &models.Disaster{
+		ID:         "test_fields",
+		Source:     "GDACS",
+		Type:       disastersv1.DisasterType_CYCLONE,
+		Title:      "Test Cyclone",
+		Magnitude:  150.0,
+		AlertLevel: disastersv1.AlertLevel_RED,
+		Latitude:   -20.0,
+		Longitude:  45.0,
+		Timestamp:  time.Now(),
+		Country:    "Madagascar",
+		Population: "1.5 million affected",
+		ReportURL:  "https://www.gdacs.org/report.aspx?eventtype=TC&eventid=123",
+		CreatedAt:  time.Now(),
+	}
+
+	err := db.Add(ctx, disaster)
+	if err != nil {
+		t.Fatalf("Add failed: %v", err)
+	}
+
+	got, err := db.GetByID(ctx, "test_fields")
+	if err != nil {
+		t.Fatalf("GetByID failed: %v", err)
+	}
+
+	if got.Country != "Madagascar" {
+		t.Errorf("expected country 'Madagascar', got '%s'", got.Country)
+	}
+	if got.Population != "1.5 million affected" {
+		t.Errorf("expected population '1.5 million affected', got '%s'", got.Population)
+	}
+	if got.ReportURL != "https://www.gdacs.org/report.aspx?eventtype=TC&eventid=123" {
+		t.Errorf("expected report_url, got '%s'", got.ReportURL)
+	}
+}
+
 func TestSQLiteDB_DuplicateAdd(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()

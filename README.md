@@ -71,12 +71,12 @@ go run ./cmd/disaster-alert
 
 ## Configuration
 
-Create a `.env` file:
+Create a `.env` file (for local development):
 
 ```env
 # Server
-HOST=localhost
-PORT=8080
+SERVER_HOST=localhost
+SERVER_PORT=8080
 GRPC_PORT=50051
 
 # Database
@@ -95,6 +95,21 @@ GDACS_POLL_INTERVAL=5m
 LOG_LEVEL=info
 ```
 
+## Docker Deployment
+
+```bash
+# Build and run
+docker-compose up -d --build
+
+# View logs
+docker logs -f disaster-alerts
+
+# Stop
+docker-compose down
+```
+
+The `docker-compose.yml` includes all necessary environment variables - no `.env` file needed for Docker.
+
 ## REST API
 
 ### GET /api/disasters
@@ -104,12 +119,17 @@ Returns disasters as GeoJSON.
 Query params:
 - `type` - earthquake, flood, cyclone, tsunami, volcano, wildfire, drought
 - `min_magnitude` - minimum magnitude (e.g., 5.0)
-- `alert_level` - green, orange, red
+- `alert_level` - exact match: green, orange, red
+- `min_alert_level` - minimum level (e.g., `orange` returns orange AND red)
 - `since` - date filter (YYYY-MM-DD)
 - `limit` - max results (default 20, max 500)
 
 ```bash
+# Get all earthquakes with magnitude >= 5.0
 curl "http://localhost:8080/api/disasters?type=earthquake&min_magnitude=5.0"
+
+# Get all orange and red alerts
+curl "http://localhost:8080/api/disasters?min_alert_level=orange"
 ```
 
 ### GET /health
@@ -131,8 +151,8 @@ Proto file: `proto/disasters/v1/disasters.proto`
 ### RPCs
 
 - `GetDisaster(id)` - Get single disaster by ID
-- `ListDisasters(limit, type, min_magnitude, alert_level)` - Query disasters
-- `StreamDisasters(...)` - Server-side stream of new disasters
+- `ListDisasters(limit, type, min_magnitude, alert_level, min_alert_level)` - Query disasters
+- `StreamDisasters(type, min_magnitude, alert_level, min_alert_level)` - Server-side stream of new disasters
 
 ### Streaming Example
 

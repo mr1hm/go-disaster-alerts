@@ -12,7 +12,6 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/mr1hm/go-disaster-alerts/internal/api"
 	"github.com/mr1hm/go-disaster-alerts/internal/config"
 	internalgrpc "github.com/mr1hm/go-disaster-alerts/internal/grpc"
@@ -22,8 +21,6 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load()
-
 	cfg, err := config.Load()
 	if err != nil {
 		logging.Fatalf("Fatal while loading config: %v", err)

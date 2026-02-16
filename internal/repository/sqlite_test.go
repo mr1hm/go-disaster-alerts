@@ -219,6 +219,51 @@ func TestSQLiteDB_NewFields(t *testing.T) {
 	}
 }
 
+func TestSQLiteDB_MarkAsSent(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	ctx := context.Background()
+	now := time.Now()
+
+	// Add test disasters
+	disasters := []*models.Disaster{
+		{ID: "sent1", Source: "test", Type: disastersv1.DisasterType_EARTHQUAKE, Timestamp: now, CreatedAt: now},
+		{ID: "sent2", Source: "test", Type: disastersv1.DisasterType_FLOOD, Timestamp: now, CreatedAt: now},
+		{ID: "sent3", Source: "test", Type: disastersv1.DisasterType_CYCLONE, Timestamp: now, CreatedAt: now},
+	}
+	for _, d := range disasters {
+		db.Add(ctx, d)
+	}
+
+	// Mark two as sent
+	count, err := db.MarkAsSent(ctx, []string{"sent1", "sent2"})
+	if err != nil {
+		t.Fatalf("MarkAsSent failed: %v", err)
+	}
+	if count != 2 {
+		t.Errorf("expected 2 rows affected, got %d", count)
+	}
+
+	// Marking non-existent IDs should return 0
+	count, err = db.MarkAsSent(ctx, []string{"nonexistent"})
+	if err != nil {
+		t.Fatalf("MarkAsSent failed: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 rows affected for non-existent ID, got %d", count)
+	}
+
+	// Empty slice should return 0
+	count, err = db.MarkAsSent(ctx, []string{})
+	if err != nil {
+		t.Fatalf("MarkAsSent failed: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 rows affected for empty slice, got %d", count)
+	}
+}
+
 func TestSQLiteDB_DuplicateAdd(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()

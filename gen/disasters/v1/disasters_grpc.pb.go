@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DisasterService_GetDisaster_FullMethodName     = "/disasters.v1.DisasterService/GetDisaster"
-	DisasterService_ListDisasters_FullMethodName   = "/disasters.v1.DisasterService/ListDisasters"
-	DisasterService_StreamDisasters_FullMethodName = "/disasters.v1.DisasterService/StreamDisasters"
+	DisasterService_GetDisaster_FullMethodName          = "/disasters.v1.DisasterService/GetDisaster"
+	DisasterService_ListDisasters_FullMethodName        = "/disasters.v1.DisasterService/ListDisasters"
+	DisasterService_StreamDisasters_FullMethodName      = "/disasters.v1.DisasterService/StreamDisasters"
+	DisasterService_AcknowledgeDisasters_FullMethodName = "/disasters.v1.DisasterService/AcknowledgeDisasters"
 )
 
 // DisasterServiceClient is the client API for DisasterService service.
@@ -37,6 +38,8 @@ type DisasterServiceClient interface {
 	// StreamDisasters opens a server-side stream that pushes new significant disasters in real-time.
 	// Only streams earthquakes >= 5.0 magnitude or other disasters with orange/red alert level.
 	StreamDisasters(ctx context.Context, in *StreamDisastersRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Disaster], error)
+	// AcknowledgeDisasters marks disasters as successfully posted to Discord.
+	AcknowledgeDisasters(ctx context.Context, in *AcknowledgeDisastersRequest, opts ...grpc.CallOption) (*AcknowledgeDisastersResponse, error)
 }
 
 type disasterServiceClient struct {
@@ -86,6 +89,16 @@ func (c *disasterServiceClient) StreamDisasters(ctx context.Context, in *StreamD
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type DisasterService_StreamDisastersClient = grpc.ServerStreamingClient[Disaster]
 
+func (c *disasterServiceClient) AcknowledgeDisasters(ctx context.Context, in *AcknowledgeDisastersRequest, opts ...grpc.CallOption) (*AcknowledgeDisastersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AcknowledgeDisastersResponse)
+	err := c.cc.Invoke(ctx, DisasterService_AcknowledgeDisasters_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DisasterServiceServer is the server API for DisasterService service.
 // All implementations must embed UnimplementedDisasterServiceServer
 // for forward compatibility.
@@ -99,6 +112,8 @@ type DisasterServiceServer interface {
 	// StreamDisasters opens a server-side stream that pushes new significant disasters in real-time.
 	// Only streams earthquakes >= 5.0 magnitude or other disasters with orange/red alert level.
 	StreamDisasters(*StreamDisastersRequest, grpc.ServerStreamingServer[Disaster]) error
+	// AcknowledgeDisasters marks disasters as successfully posted to Discord.
+	AcknowledgeDisasters(context.Context, *AcknowledgeDisastersRequest) (*AcknowledgeDisastersResponse, error)
 	mustEmbedUnimplementedDisasterServiceServer()
 }
 
@@ -117,6 +132,9 @@ func (UnimplementedDisasterServiceServer) ListDisasters(context.Context, *ListDi
 }
 func (UnimplementedDisasterServiceServer) StreamDisasters(*StreamDisastersRequest, grpc.ServerStreamingServer[Disaster]) error {
 	return status.Error(codes.Unimplemented, "method StreamDisasters not implemented")
+}
+func (UnimplementedDisasterServiceServer) AcknowledgeDisasters(context.Context, *AcknowledgeDisastersRequest) (*AcknowledgeDisastersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AcknowledgeDisasters not implemented")
 }
 func (UnimplementedDisasterServiceServer) mustEmbedUnimplementedDisasterServiceServer() {}
 func (UnimplementedDisasterServiceServer) testEmbeddedByValue()                         {}
@@ -186,6 +204,24 @@ func _DisasterService_StreamDisasters_Handler(srv interface{}, stream grpc.Serve
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type DisasterService_StreamDisastersServer = grpc.ServerStreamingServer[Disaster]
 
+func _DisasterService_AcknowledgeDisasters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AcknowledgeDisastersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DisasterServiceServer).AcknowledgeDisasters(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DisasterService_AcknowledgeDisasters_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DisasterServiceServer).AcknowledgeDisasters(ctx, req.(*AcknowledgeDisastersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DisasterService_ServiceDesc is the grpc.ServiceDesc for DisasterService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -200,6 +236,10 @@ var DisasterService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDisasters",
 			Handler:    _DisasterService_ListDisasters_Handler,
+		},
+		{
+			MethodName: "AcknowledgeDisasters",
+			Handler:    _DisasterService_AcknowledgeDisasters_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

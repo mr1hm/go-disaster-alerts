@@ -58,7 +58,8 @@ func (s *SQLiteDB) migrate() error {
 			population TEXT DEFAULT '',
 			report_url TEXT DEFAULT '',
 			raw BLOB,
-			created_at DATETIME NOT NULL
+			created_at DATETIME NOT NULL,
+			discord_sent BOOLEAN DEFAULT FALSE
 		);
 
 		CREATE TABLE IF NOT EXISTS alerts (
@@ -72,6 +73,7 @@ func (s *SQLiteDB) migrate() error {
 		CREATE INDEX IF NOT EXISTS idx_disasters_timestamp ON disasters(timestamp);
 		CREATE INDEX IF NOT EXISTS idx_disasters_type ON disasters(type);
 		CREATE INDEX IF NOT EXISTS idx_disasters_alert_level ON disasters(alert_level);
+		CREATE INDEX IF NOT EXISTS idx_disasters_discord_sent ON disasters(discord_sent);
 		CREATE INDEX IF NOT EXISTS idx_alerts_disaster_id ON alerts(disaster_id);
   	`
 
@@ -150,6 +152,10 @@ func (s *SQLiteDB) ListDisasters(ctx context.Context, opts Filter) ([]models.Dis
 	if opts.MinAlertLevel != nil {
 		conditions = append(conditions, "alert_level >= ?")
 		args = append(args, int32(*opts.MinAlertLevel))
+	}
+	if opts.DiscordSent != nil {
+		conditions = append(conditions, "discord_sent = ?")
+		args = append(args, *opts.DiscordSent)
 	}
 
 	if len(conditions) > 0 {
@@ -262,6 +268,27 @@ func (s *SQLiteDB) ListAlerts(ctx context.Context, opts Filter) ([]models.Alert,
 	}
 
 	return alerts, rows.Err()
+}
+
+func (s *SQLiteDB) MarkAsSent(ctx context.Context, ids []string) (int64, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+
+	placeholders := make([]string, len(ids))
+	args := make([]any, len(ids))
+	for i, id := range ids {
+		placeholders[i] = "?"
+		args[i] = id
+	}
+
+	query := fmt.Sprintf("UPDATE disasters SET discord_sent = TRUE WHERE id IN (%s)", strings.Join(placeholders, ","))
+	result, err := s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
 }
 
 func (s *SQLiteDB) Close() error {

@@ -322,6 +322,7 @@ type ListDisastersRequest struct {
 	MinMagnitude  *float64               `protobuf:"fixed64,3,opt,name=min_magnitude,json=minMagnitude,proto3,oneof" json:"min_magnitude,omitempty"`
 	AlertLevel    *AlertLevel            `protobuf:"varint,4,opt,name=alert_level,json=alertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"alert_level,omitempty"`
 	MinAlertLevel *AlertLevel            `protobuf:"varint,5,opt,name=min_alert_level,json=minAlertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"min_alert_level,omitempty"` // >= this level (e.g., ORANGE includes ORANGE and RED)
+	DiscordSent   *bool                  `protobuf:"varint,6,opt,name=discord_sent,json=discordSent,proto3,oneof" json:"discord_sent,omitempty"`                                      // Filter by discord_sent status (false = unsent)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -389,6 +390,13 @@ func (x *ListDisastersRequest) GetMinAlertLevel() AlertLevel {
 		return *x.MinAlertLevel
 	}
 	return AlertLevel_UNKNOWN
+}
+
+func (x *ListDisastersRequest) GetDiscordSent() bool {
+	if x != nil && x.DiscordSent != nil {
+		return *x.DiscordSent
+	}
+	return false
 }
 
 type ListDisastersResponse struct {
@@ -503,6 +511,94 @@ func (x *StreamDisastersRequest) GetMinAlertLevel() AlertLevel {
 	return AlertLevel_UNKNOWN
 }
 
+type AcknowledgeDisastersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"` // Disaster IDs successfully posted to Discord
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcknowledgeDisastersRequest) Reset() {
+	*x = AcknowledgeDisastersRequest{}
+	mi := &file_proto_disasters_v1_disasters_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcknowledgeDisastersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcknowledgeDisastersRequest) ProtoMessage() {}
+
+func (x *AcknowledgeDisastersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_disasters_v1_disasters_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcknowledgeDisastersRequest.ProtoReflect.Descriptor instead.
+func (*AcknowledgeDisastersRequest) Descriptor() ([]byte, []int) {
+	return file_proto_disasters_v1_disasters_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *AcknowledgeDisastersRequest) GetIds() []string {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+type AcknowledgeDisastersResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	AcknowledgedCount int64                  `protobuf:"varint,1,opt,name=acknowledged_count,json=acknowledgedCount,proto3" json:"acknowledged_count,omitempty"` // Number of disasters marked as sent
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *AcknowledgeDisastersResponse) Reset() {
+	*x = AcknowledgeDisastersResponse{}
+	mi := &file_proto_disasters_v1_disasters_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcknowledgeDisastersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcknowledgeDisastersResponse) ProtoMessage() {}
+
+func (x *AcknowledgeDisastersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_disasters_v1_disasters_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcknowledgeDisastersResponse.ProtoReflect.Descriptor instead.
+func (*AcknowledgeDisastersResponse) Descriptor() ([]byte, []int) {
+	return file_proto_disasters_v1_disasters_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *AcknowledgeDisastersResponse) GetAcknowledgedCount() int64 {
+	if x != nil {
+		return x.AcknowledgedCount
+	}
+	return 0
+}
+
 var File_proto_disasters_v1_disasters_proto protoreflect.FileDescriptor
 
 const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
@@ -527,18 +623,20 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"population\x18\v \x01(\tR\n" +
 	"population\x12\x1d\n" +
 	"\n" +
-	"report_url\x18\f \x01(\tR\treportUrl\"\xd1\x02\n" +
+	"report_url\x18\f \x01(\tR\treportUrl\"\x8a\x03\n" +
 	"\x14ListDisastersRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x123\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1a.disasters.v1.DisasterTypeH\x00R\x04type\x88\x01\x01\x12(\n" +
 	"\rmin_magnitude\x18\x03 \x01(\x01H\x01R\fminMagnitude\x88\x01\x01\x12>\n" +
 	"\valert_level\x18\x04 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x02R\n" +
 	"alertLevel\x88\x01\x01\x12E\n" +
-	"\x0fmin_alert_level\x18\x05 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x03R\rminAlertLevel\x88\x01\x01B\a\n" +
+	"\x0fmin_alert_level\x18\x05 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x03R\rminAlertLevel\x88\x01\x01\x12&\n" +
+	"\fdiscord_sent\x18\x06 \x01(\bH\x04R\vdiscordSent\x88\x01\x01B\a\n" +
 	"\x05_typeB\x10\n" +
 	"\x0e_min_magnitudeB\x0e\n" +
 	"\f_alert_levelB\x12\n" +
-	"\x10_min_alert_level\"M\n" +
+	"\x10_min_alert_levelB\x0f\n" +
+	"\r_discord_sent\"M\n" +
 	"\x15ListDisastersResponse\x124\n" +
 	"\tdisasters\x18\x01 \x03(\v2\x16.disasters.v1.DisasterR\tdisasters\"\xbd\x02\n" +
 	"\x16StreamDisastersRequest\x123\n" +
@@ -550,7 +648,11 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"\x05_typeB\x10\n" +
 	"\x0e_min_magnitudeB\x0e\n" +
 	"\f_alert_levelB\x12\n" +
-	"\x10_min_alert_level*|\n" +
+	"\x10_min_alert_level\"/\n" +
+	"\x1bAcknowledgeDisastersRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\"M\n" +
+	"\x1cAcknowledgeDisastersResponse\x12-\n" +
+	"\x12acknowledged_count\x18\x01 \x01(\x03R\x11acknowledgedCount*|\n" +
 	"\fDisasterType\x12\x0f\n" +
 	"\vUNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +
@@ -567,11 +669,12 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"\x05GREEN\x10\x01\x12\n" +
 	"\n" +
 	"\x06ORANGE\x10\x02\x12\a\n" +
-	"\x03RED\x10\x032\x87\x02\n" +
+	"\x03RED\x10\x032\xf6\x02\n" +
 	"\x0fDisasterService\x12G\n" +
 	"\vGetDisaster\x12 .disasters.v1.GetDisasterRequest\x1a\x16.disasters.v1.Disaster\x12X\n" +
 	"\rListDisasters\x12\".disasters.v1.ListDisastersRequest\x1a#.disasters.v1.ListDisastersResponse\x12Q\n" +
-	"\x0fStreamDisasters\x12$.disasters.v1.StreamDisastersRequest\x1a\x16.disasters.v1.Disaster0\x01B6Z4github.com/mr1hm/go-disaster-alerts/gen/disasters/v1b\x06proto3"
+	"\x0fStreamDisasters\x12$.disasters.v1.StreamDisastersRequest\x1a\x16.disasters.v1.Disaster0\x01\x12m\n" +
+	"\x14AcknowledgeDisasters\x12).disasters.v1.AcknowledgeDisastersRequest\x1a*.disasters.v1.AcknowledgeDisastersResponseB6Z4github.com/mr1hm/go-disaster-alerts/gen/disasters/v1b\x06proto3"
 
 var (
 	file_proto_disasters_v1_disasters_proto_rawDescOnce sync.Once
@@ -586,15 +689,17 @@ func file_proto_disasters_v1_disasters_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_disasters_v1_disasters_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_proto_disasters_v1_disasters_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_disasters_v1_disasters_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_proto_disasters_v1_disasters_proto_goTypes = []any{
-	(DisasterType)(0),              // 0: disasters.v1.DisasterType
-	(AlertLevel)(0),                // 1: disasters.v1.AlertLevel
-	(*GetDisasterRequest)(nil),     // 2: disasters.v1.GetDisasterRequest
-	(*Disaster)(nil),               // 3: disasters.v1.Disaster
-	(*ListDisastersRequest)(nil),   // 4: disasters.v1.ListDisastersRequest
-	(*ListDisastersResponse)(nil),  // 5: disasters.v1.ListDisastersResponse
-	(*StreamDisastersRequest)(nil), // 6: disasters.v1.StreamDisastersRequest
+	(DisasterType)(0),                    // 0: disasters.v1.DisasterType
+	(AlertLevel)(0),                      // 1: disasters.v1.AlertLevel
+	(*GetDisasterRequest)(nil),           // 2: disasters.v1.GetDisasterRequest
+	(*Disaster)(nil),                     // 3: disasters.v1.Disaster
+	(*ListDisastersRequest)(nil),         // 4: disasters.v1.ListDisastersRequest
+	(*ListDisastersResponse)(nil),        // 5: disasters.v1.ListDisastersResponse
+	(*StreamDisastersRequest)(nil),       // 6: disasters.v1.StreamDisastersRequest
+	(*AcknowledgeDisastersRequest)(nil),  // 7: disasters.v1.AcknowledgeDisastersRequest
+	(*AcknowledgeDisastersResponse)(nil), // 8: disasters.v1.AcknowledgeDisastersResponse
 }
 var file_proto_disasters_v1_disasters_proto_depIdxs = []int32{
 	0,  // 0: disasters.v1.Disaster.type:type_name -> disasters.v1.DisasterType
@@ -609,11 +714,13 @@ var file_proto_disasters_v1_disasters_proto_depIdxs = []int32{
 	2,  // 9: disasters.v1.DisasterService.GetDisaster:input_type -> disasters.v1.GetDisasterRequest
 	4,  // 10: disasters.v1.DisasterService.ListDisasters:input_type -> disasters.v1.ListDisastersRequest
 	6,  // 11: disasters.v1.DisasterService.StreamDisasters:input_type -> disasters.v1.StreamDisastersRequest
-	3,  // 12: disasters.v1.DisasterService.GetDisaster:output_type -> disasters.v1.Disaster
-	5,  // 13: disasters.v1.DisasterService.ListDisasters:output_type -> disasters.v1.ListDisastersResponse
-	3,  // 14: disasters.v1.DisasterService.StreamDisasters:output_type -> disasters.v1.Disaster
-	12, // [12:15] is the sub-list for method output_type
-	9,  // [9:12] is the sub-list for method input_type
+	7,  // 12: disasters.v1.DisasterService.AcknowledgeDisasters:input_type -> disasters.v1.AcknowledgeDisastersRequest
+	3,  // 13: disasters.v1.DisasterService.GetDisaster:output_type -> disasters.v1.Disaster
+	5,  // 14: disasters.v1.DisasterService.ListDisasters:output_type -> disasters.v1.ListDisastersResponse
+	3,  // 15: disasters.v1.DisasterService.StreamDisasters:output_type -> disasters.v1.Disaster
+	8,  // 16: disasters.v1.DisasterService.AcknowledgeDisasters:output_type -> disasters.v1.AcknowledgeDisastersResponse
+	13, // [13:17] is the sub-list for method output_type
+	9,  // [9:13] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
 	9,  // [9:9] is the sub-list for extension extendee
 	0,  // [0:9] is the sub-list for field type_name
@@ -632,7 +739,7 @@ func file_proto_disasters_v1_disasters_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_disasters_v1_disasters_proto_rawDesc), len(file_proto_disasters_v1_disasters_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

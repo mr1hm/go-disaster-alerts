@@ -42,6 +42,10 @@ func (m *mockRepo) Exists(ctx context.Context, id string) (bool, error) {
 	return false, nil
 }
 
+func (m *mockRepo) MarkAsSent(ctx context.Context, ids []string) (int64, error) {
+	return int64(len(ids)), nil
+}
+
 func (m *mockRepo) ListDisasters(ctx context.Context, opts repository.Filter) ([]models.Disaster, error) {
 	results := m.disasters
 

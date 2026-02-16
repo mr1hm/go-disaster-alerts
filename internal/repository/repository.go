@@ -16,6 +16,7 @@ type Filter struct {
 	MinMagnitude  *float64
 	AlertLevel    *disastersv1.AlertLevel
 	MinAlertLevel *disastersv1.AlertLevel // >= this level (e.g., ORANGE includes ORANGE and RED)
+	DiscordSent   *bool                   // Filter by discord_sent status
 }
 
 type DisasterRepository interface {
@@ -23,6 +24,7 @@ type DisasterRepository interface {
 	GetByID(ctx context.Context, id string) (*models.Disaster, error)
 	Exists(ctx context.Context, id string) (bool, error)
 	ListDisasters(ctx context.Context, opts Filter) ([]models.Disaster, error)
+	MarkAsSent(ctx context.Context, ids []string) (int64, error)
 }
 
 type AlertRepository interface {

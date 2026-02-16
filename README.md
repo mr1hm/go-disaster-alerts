@@ -151,8 +151,9 @@ Proto file: `proto/disasters/v1/disasters.proto`
 ### RPCs
 
 - `GetDisaster(id)` - Get single disaster by ID
-- `ListDisasters(limit, type, min_magnitude, alert_level, min_alert_level)` - Query disasters
+- `ListDisasters(limit, type, min_magnitude, alert_level, min_alert_level, discord_sent)` - Query disasters
 - `StreamDisasters(type, min_magnitude, alert_level, min_alert_level)` - Server-side stream of new disasters
+- `AcknowledgeDisasters(ids)` - Mark disasters as successfully posted to Discord (prevents duplicates on bot restart)
 
 ### Streaming Example
 

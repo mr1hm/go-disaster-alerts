@@ -64,6 +64,10 @@ func (m *mockDisasterRepo) ListDisasters(ctx context.Context, opts repository.Fi
 	return results, nil
 }
 
+func (m *mockDisasterRepo) MarkAsSent(ctx context.Context, ids []string) (int64, error) {
+	return int64(len(ids)), nil
+}
+
 func TestManager_StartStop(t *testing.T) {
 	cfg := &config.Config{
 		Worker: config.WorkerConfig{

@@ -79,6 +79,9 @@ func (s *Server) ListDisasters(ctx context.Context, req *disastersv1.ListDisaste
 	if req.MinAlertLevel != nil && *req.MinAlertLevel != disastersv1.AlertLevel_UNKNOWN {
 		filter.MinAlertLevel = req.MinAlertLevel
 	}
+	if req.DiscordSent != nil {
+		filter.DiscordSent = req.DiscordSent
+	}
 
 	disasters, err := s.repo.ListDisasters(ctx, filter)
 	if err != nil {
@@ -136,6 +139,20 @@ func (s *Server) StreamDisasters(req *disastersv1.StreamDisastersRequest, stream
 			}
 		}
 	}
+}
+
+func (s *Server) AcknowledgeDisasters(ctx context.Context, req *disastersv1.AcknowledgeDisastersRequest) (*disastersv1.AcknowledgeDisastersResponse, error) {
+	if len(req.Ids) == 0 {
+		return &disastersv1.AcknowledgeDisastersResponse{AcknowledgedCount: 0}, nil
+	}
+
+	count, err := s.repo.MarkAsSent(ctx, req.Ids)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to acknowledge disasters: %v", err)
+	}
+
+	slog.Info("disasters acknowledged", "count", count, "ids", req.Ids)
+	return &disastersv1.AcknowledgeDisastersResponse{AcknowledgedCount: count}, nil
 }
 
 func toProto(d *models.Disaster) *disastersv1.Disaster {

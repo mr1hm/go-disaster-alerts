@@ -15,6 +15,9 @@ service DisasterService {
     // StreamDisasters opens a server-side stream that pushes new significant disasters in real-time.
     // Only streams earthquakes >= 5.0 magnitude or other disasters with orange/red alert level.
     rpc StreamDisasters(StreamDisastersRequest) returns (stream Disaster);
+
+    // AcknowledgeDisasters marks disasters as successfully posted to Discord.
+    rpc AcknowledgeDisasters(AcknowledgeDisastersRequest) returns (AcknowledgeDisastersResponse);
 }
 
 message GetDisasterRequest {
@@ -62,6 +65,7 @@ message ListDisastersRequest {
     optional double min_magnitude = 3;
     optional AlertLevel alert_level = 4;
     optional AlertLevel min_alert_level = 5; // >= this level (e.g., ORANGE includes ORANGE and RED)
+    optional bool discord_sent = 6;          // Filter by discord_sent status (false = unsent)
 }
 
 message ListDisastersResponse {
@@ -73,4 +77,12 @@ message StreamDisastersRequest {
     optional double min_magnitude = 2;
     optional AlertLevel alert_level = 3;
     optional AlertLevel min_alert_level = 4; // >= this level (e.g., ORANGE includes ORANGE and RED)
+}
+
+message AcknowledgeDisastersRequest {
+    repeated string ids = 1; // Disaster IDs successfully posted to Discord
+}
+
+message AcknowledgeDisastersResponse {
+    int64 acknowledged_count = 1; // Number of disasters marked as sent
 }

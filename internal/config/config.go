@@ -31,9 +31,6 @@ type WorkerConfig struct {
 }
 
 type SourcesConfig struct {
-	USGSEnabled       bool
-	USGSURL           string
-	USGSPollInterval  time.Duration
 	GDACSEnabled      bool
 	GDACSURL          string
 	GDACSPollInterval time.Duration
@@ -61,9 +58,6 @@ func Load() (*Config, error) {
 			BufferSize: getEnvInt("WORKER_BUFFER_SIZE", 20),
 		},
 		Sources: SourcesConfig{
-			USGSEnabled:       getEnvBool("USGS_ENABLED", true),
-			USGSURL:           getEnv("USGS_URL", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson"),
-			USGSPollInterval:  getEnvDuration("USGS_POLL_INTERVAL", 5*time.Minute),
 			GDACSEnabled:      getEnvBool("GDACS_ENABLED", true),
 			GDACSURL:          getEnv("GDACS_URL", "https://www.gdacs.org/xml/rss.xml"),
 			GDACSPollInterval: getEnvDuration("GDACS_POLL_INTERVAL", 10*time.Minute),
@@ -93,9 +87,6 @@ func (c *Config) validate() error {
 		return fmt.Errorf("invalid log level: %s", c.Logging.Level)
 	}
 
-	if c.Sources.USGSPollInterval < time.Minute {
-		return fmt.Errorf("USGS poll interval must be at least 1 minute")
-	}
 	if c.Sources.GDACSPollInterval < time.Minute {
 		return fmt.Errorf("GDACS poll interval must be at least 1 minute")
 	}

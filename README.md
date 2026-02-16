@@ -1,18 +1,16 @@
 # go-disaster-alerts
 
-A Go backend service that aggregates real-time disaster data from USGS and GDACS, providing both a REST API and gRPC streaming for live alerts.
+A Go backend service that aggregates real-time disaster data from GDACS, providing both a REST API and gRPC streaming for live alerts.
 
 ## Architecture
 
 ```
-┌─────────────┐     ┌─────────────┐
-│    USGS     │     │   GDACS     │
-│  (JSON API) │     │  (RSS/XML)  │
-└──────┬──────┘     └──────┬──────┘
-       │                   │
-       └─────────┬─────────┘
-                 │ poll (5m interval)
-                 ▼
+       ┌─────────────┐
+       │   GDACS     │
+       │  (RSS/XML)  │
+       └──────┬──────┘
+              │ poll (5m interval)
+              ▼
        ┌─────────────────────┐
        │  Ingestion Manager  │
        │  (retry + backoff)  │
@@ -41,7 +39,7 @@ A Go backend service that aggregates real-time disaster data from USGS and GDACS
 
 ## Features
 
-- Polls USGS (earthquakes) and GDACS (earthquakes, floods, cyclones, tsunamis, volcanoes, wildfires, droughts)
+- Polls GDACS for earthquakes, floods, cyclones, tsunamis, volcanoes, wildfires, and droughts
 - REST API returning GeoJSON for map integration
 - gRPC streaming for real-time disaster notifications
 - SQLite storage with deduplication
@@ -83,10 +81,6 @@ GRPC_PORT=50051
 DB_PATH=./data/disasters.db
 
 # Sources
-USGS_ENABLED=true
-USGS_URL=https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson
-USGS_POLL_INTERVAL=5m
-
 GDACS_ENABLED=true
 GDACS_URL=https://www.gdacs.org/xml/rss.xml
 GDACS_POLL_INTERVAL=5m
@@ -166,12 +160,12 @@ grpcurl -plaintext -proto proto/disasters/v1/disasters.proto \
 
 | Field | Type | Description |
 |-------|------|-------------|
-| id | string | Unique ID (e.g., `gdacs_12345`, `usgs_us7000abc`) |
-| source | string | `USGS` or `GDACS` |
+| id | string | Unique ID (e.g., `gdacs_12345`) |
+| source | string | `GDACS` |
 | type | DisasterType | Category of disaster |
 | title | string | Event title/summary |
 | magnitude | double | Richter scale (earthquakes) |
-| alert_level | AlertLevel | Severity level (GDACS only) |
+| alert_level | AlertLevel | Severity level |
 | latitude | double | Event latitude |
 | longitude | double | Event longitude |
 | timestamp | int64 | Unix timestamp of event |
@@ -191,8 +185,8 @@ grpcurl -plaintext -proto proto/disasters/v1/disasters.proto \
 - WILDFIRE (6)
 - DROUGHT (7)
 
-### AlertLevel (GDACS)
-- UNKNOWN (0) - Used for USGS earthquakes
+### AlertLevel
+- UNKNOWN (0) - Default/unset
 - GREEN (1) - Minor impact
 - ORANGE (2) - Moderate impact
 - RED (3) - Severe, may need international aid

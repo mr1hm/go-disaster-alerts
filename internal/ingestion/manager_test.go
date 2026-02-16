@@ -75,9 +75,7 @@ func TestManager_StartStop(t *testing.T) {
 			BufferSize: 10,
 		},
 		Sources: config.SourcesConfig{
-			USGSEnabled:       false,
 			GDACSEnabled:      false,
-			USGSPollInterval:  time.Minute,
 			GDACSPollInterval: time.Minute,
 		},
 	}
@@ -107,7 +105,6 @@ func TestManager_ConcurrentSubmit(t *testing.T) {
 			BufferSize: 100,
 		},
 		Sources: config.SourcesConfig{
-			USGSEnabled:  false,
 			GDACSEnabled: false,
 		},
 	}
@@ -163,7 +160,6 @@ func TestManager_GracefulShutdown(t *testing.T) {
 			BufferSize: 100,
 		},
 		Sources: config.SourcesConfig{
-			USGSEnabled:  false,
 			GDACSEnabled: false,
 		},
 	}
@@ -212,7 +208,6 @@ func TestManager_RaceCondition(t *testing.T) {
 			BufferSize: 50,
 		},
 		Sources: config.SourcesConfig{
-			USGSEnabled:  false,
 			GDACSEnabled: false,
 		},
 	}

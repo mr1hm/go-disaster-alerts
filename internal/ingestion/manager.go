@@ -50,12 +50,6 @@ func (m *Manager) Start(ctx context.Context) {
 	m.pool = worker.NewWorkerPool(m.cfg.Worker.Count, m.cfg.Worker.BufferSize, processor)
 	m.pool.Start(ctx)
 
-	// Start USGS poller if enabled
-	if m.cfg.Sources.USGSEnabled {
-		m.wg.Add(1)
-		go m.runPoller(ctx, "usgs", m.cfg.Sources.USGSURL, m.cfg.Sources.USGSPollInterval)
-	}
-
 	// Start GDACS poller if enabled
 	if m.cfg.Sources.GDACSEnabled {
 		m.wg.Add(1)
@@ -93,12 +87,7 @@ func (m *Manager) poll(ctx context.Context, source, url string) {
 	)
 
 	for attempt := 0; attempt < 5; attempt++ {
-		switch source {
-		case "usgs":
-			disasters, err = m.pollUSGS(ctx, url)
-		case "gdacs":
-			disasters, err = m.pollGDACS(ctx, url)
-		}
+		disasters, err = m.pollGDACS(ctx, url)
 
 		if err == nil {
 			break

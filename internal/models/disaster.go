@@ -7,8 +7,8 @@ import (
 )
 
 type Disaster struct {
-	ID          string // Unique ID from source (e.g., "usgs_us7000abc")
-	Source      string // "USGS" or "GDACS"
+	ID          string // Unique ID from source (e.g., "gdacs_12345")
+	Source      string // "GDACS"
 	Type        disastersv1.DisasterType
 	Title       string
 	Description string

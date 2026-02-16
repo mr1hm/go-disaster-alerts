@@ -29,7 +29,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// DisasterService provides access to global disaster data from USGS and GDACS.
+// DisasterService provides access to global disaster data from GDACS.
 type DisasterServiceClient interface {
 	// GetDisaster retrieves a single disaster by its unique ID.
 	GetDisaster(ctx context.Context, in *GetDisasterRequest, opts ...grpc.CallOption) (*Disaster, error)
@@ -103,7 +103,7 @@ func (c *disasterServiceClient) AcknowledgeDisasters(ctx context.Context, in *Ac
 // All implementations must embed UnimplementedDisasterServiceServer
 // for forward compatibility.
 //
-// DisasterService provides access to global disaster data from USGS and GDACS.
+// DisasterService provides access to global disaster data from GDACS.
 type DisasterServiceServer interface {
 	// GetDisaster retrieves a single disaster by its unique ID.
 	GetDisaster(context.Context, *GetDisasterRequest) (*Disaster, error)

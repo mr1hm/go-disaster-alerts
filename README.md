@@ -5,12 +5,12 @@ A Go backend service that aggregates real-time disaster data from GDACS, providi
 ## Architecture
 
 ```
-       ┌─────────────┐
-       │   GDACS     │
-       │  (RSS/XML)  │
-       └──────┬──────┘
-              │ poll (5m interval)
-              ▼
+          ┌─────────────┐
+          │    GDACS    │
+          │  (RSS/XML)  │
+          └──────┬──────┘
+                 │ poll (5m interval)
+                 ▼
        ┌─────────────────────┐
        │  Ingestion Manager  │
        │  (retry + backoff)  │
@@ -21,20 +21,20 @@ A Go backend service that aggregates real-time disaster data from GDACS, providi
          ▼                 ▼
    ┌──────────┐    ┌─────────────┐
    │  SQLite  │    │ Broadcaster │
-   │   (DB)   │    │  (gRPC)     │
+   │   (DB)   │    │   (gRPC)    │
    └────┬─────┘    └──────┬──────┘
         │                 │
         ▼                 ▼
-┌───────────────┐  ┌───────────────┐
-│   REST API    │  │ gRPC Stream   │
-│  (GeoJSON)    │  │ (real-time)   │
-└───────┬───────┘  └───────┬───────┘
-        │                  │
-        ▼                  ▼
-   ┌─────────┐      ┌─────────────┐
-   │ Web App │      │ Discord Bot │
-   │  (map)  │      │  (alerts)   │
-   └─────────┘      └─────────────┘
+ ┌────────────┐    ┌─────────────┐
+ │  REST API  │    │ gRPC Stream │
+ │  (GeoJSON) │    │ (real-time) │
+ └─────┬──────┘    └──────┬──────┘
+       │                  │
+       ▼                  ▼
+  ┌─────────┐      ┌─────────────┐
+  │ Web App │      │ Discord Bot │
+  │  (map)  │      │  (alerts)   │
+  └─────────┘      └─────────────┘
 ```
 
 ## Features

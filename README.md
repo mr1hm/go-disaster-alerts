@@ -170,8 +170,9 @@ grpcurl -plaintext -proto proto/disasters/v1/disasters.proto \
 | longitude | double | Event longitude |
 | timestamp | int64 | Unix timestamp of event |
 | country | string | Country where disaster occurred |
-| population | string | Affected population (e.g., "1 thousand (in MMI>=VII)") |
+| affected_population | string | Text description (e.g., "1 thousand (in MMI>=VII)") |
 | report_url | string | Link to detailed GDACS report |
+| affected_population_count | int64 | Numeric population value for filtering |
 
 ## Enums
 

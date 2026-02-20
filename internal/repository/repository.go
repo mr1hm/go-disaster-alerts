@@ -9,14 +9,15 @@ import (
 )
 
 type Filter struct {
-	Limit         int
-	Offset        int
-	Since         *time.Time
-	Type          *disastersv1.DisasterType
-	MinMagnitude  *float64
-	AlertLevel    *disastersv1.AlertLevel
-	MinAlertLevel *disastersv1.AlertLevel // >= this level (e.g., ORANGE includes ORANGE and RED)
-	DiscordSent   *bool                   // Filter by discord_sent status
+	Limit                       int
+	Offset                      int
+	Since                       *time.Time
+	Type                        *disastersv1.DisasterType
+	MinMagnitude                *float64
+	AlertLevel                  *disastersv1.AlertLevel
+	MinAlertLevel               *disastersv1.AlertLevel // >= this level (e.g., ORANGE includes ORANGE and RED)
+	DiscordSent                 *bool                   // Filter by discord_sent status
+	MinAffectedPopulationCount  *int64                  // Minimum affected population count
 }
 
 type DisasterRepository interface {

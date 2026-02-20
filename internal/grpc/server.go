@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -81,6 +82,13 @@ func (s *Server) ListDisasters(ctx context.Context, req *disastersv1.ListDisaste
 	}
 	if req.DiscordSent != nil {
 		filter.DiscordSent = req.DiscordSent
+	}
+	if req.Since != nil {
+		since := time.Unix(*req.Since, 0)
+		filter.Since = &since
+	}
+	if req.MinAffectedPopulationCount != nil {
+		filter.MinAffectedPopulationCount = req.MinAffectedPopulationCount
 	}
 
 	disasters, err := s.repo.ListDisasters(ctx, filter)

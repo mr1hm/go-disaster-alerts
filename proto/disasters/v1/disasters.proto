@@ -65,8 +65,10 @@ message ListDisastersRequest {
     optional DisasterType type = 2;
     optional double min_magnitude = 3;
     optional AlertLevel alert_level = 4;
-    optional AlertLevel min_alert_level = 5; // >= this level (e.g., ORANGE includes ORANGE and RED)
-    optional bool discord_sent = 6;          // Filter by discord_sent status (false = unsent)
+    optional AlertLevel min_alert_level = 5;              // >= this level (e.g., ORANGE includes ORANGE and RED)
+    optional bool discord_sent = 6;                       // Filter by discord_sent status (false = unsent)
+    optional int64 since = 7;                             // Unix timestamp - only disasters after this time
+    optional int64 min_affected_population_count = 8;     // Minimum affected population count
 }
 
 message ListDisastersResponse {

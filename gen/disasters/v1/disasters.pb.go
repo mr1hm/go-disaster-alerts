@@ -324,15 +324,17 @@ func (x *Disaster) GetAffectedPopulationCount() int64 {
 }
 
 type ListDisastersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Type          *DisasterType          `protobuf:"varint,2,opt,name=type,proto3,enum=disasters.v1.DisasterType,oneof" json:"type,omitempty"`
-	MinMagnitude  *float64               `protobuf:"fixed64,3,opt,name=min_magnitude,json=minMagnitude,proto3,oneof" json:"min_magnitude,omitempty"`
-	AlertLevel    *AlertLevel            `protobuf:"varint,4,opt,name=alert_level,json=alertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"alert_level,omitempty"`
-	MinAlertLevel *AlertLevel            `protobuf:"varint,5,opt,name=min_alert_level,json=minAlertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"min_alert_level,omitempty"` // >= this level (e.g., ORANGE includes ORANGE and RED)
-	DiscordSent   *bool                  `protobuf:"varint,6,opt,name=discord_sent,json=discordSent,proto3,oneof" json:"discord_sent,omitempty"`                                      // Filter by discord_sent status (false = unsent)
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"open.v1"`
+	Limit                      int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Type                       *DisasterType          `protobuf:"varint,2,opt,name=type,proto3,enum=disasters.v1.DisasterType,oneof" json:"type,omitempty"`
+	MinMagnitude               *float64               `protobuf:"fixed64,3,opt,name=min_magnitude,json=minMagnitude,proto3,oneof" json:"min_magnitude,omitempty"`
+	AlertLevel                 *AlertLevel            `protobuf:"varint,4,opt,name=alert_level,json=alertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"alert_level,omitempty"`
+	MinAlertLevel              *AlertLevel            `protobuf:"varint,5,opt,name=min_alert_level,json=minAlertLevel,proto3,enum=disasters.v1.AlertLevel,oneof" json:"min_alert_level,omitempty"`             // >= this level (e.g., ORANGE includes ORANGE and RED)
+	DiscordSent                *bool                  `protobuf:"varint,6,opt,name=discord_sent,json=discordSent,proto3,oneof" json:"discord_sent,omitempty"`                                                  // Filter by discord_sent status (false = unsent)
+	Since                      *int64                 `protobuf:"varint,7,opt,name=since,proto3,oneof" json:"since,omitempty"`                                                                                 // Unix timestamp - only disasters after this time
+	MinAffectedPopulationCount *int64                 `protobuf:"varint,8,opt,name=min_affected_population_count,json=minAffectedPopulationCount,proto3,oneof" json:"min_affected_population_count,omitempty"` // Minimum affected population count
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *ListDisastersRequest) Reset() {
@@ -405,6 +407,20 @@ func (x *ListDisastersRequest) GetDiscordSent() bool {
 		return *x.DiscordSent
 	}
 	return false
+}
+
+func (x *ListDisastersRequest) GetSince() int64 {
+	if x != nil && x.Since != nil {
+		return *x.Since
+	}
+	return 0
+}
+
+func (x *ListDisastersRequest) GetMinAffectedPopulationCount() int64 {
+	if x != nil && x.MinAffectedPopulationCount != nil {
+		return *x.MinAffectedPopulationCount
+	}
+	return 0
 }
 
 type ListDisastersResponse struct {
@@ -630,7 +646,7 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"\x13affected_population\x18\v \x01(\tR\x12affectedPopulation\x12\x1d\n" +
 	"\n" +
 	"report_url\x18\f \x01(\tR\treportUrl\x12:\n" +
-	"\x19affected_population_count\x18\r \x01(\x03R\x17affectedPopulationCount\"\x8a\x03\n" +
+	"\x19affected_population_count\x18\r \x01(\x03R\x17affectedPopulationCount\"\x99\x04\n" +
 	"\x14ListDisastersRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x123\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1a.disasters.v1.DisasterTypeH\x00R\x04type\x88\x01\x01\x12(\n" +
@@ -638,12 +654,16 @@ const file_proto_disasters_v1_disasters_proto_rawDesc = "" +
 	"\valert_level\x18\x04 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x02R\n" +
 	"alertLevel\x88\x01\x01\x12E\n" +
 	"\x0fmin_alert_level\x18\x05 \x01(\x0e2\x18.disasters.v1.AlertLevelH\x03R\rminAlertLevel\x88\x01\x01\x12&\n" +
-	"\fdiscord_sent\x18\x06 \x01(\bH\x04R\vdiscordSent\x88\x01\x01B\a\n" +
+	"\fdiscord_sent\x18\x06 \x01(\bH\x04R\vdiscordSent\x88\x01\x01\x12\x19\n" +
+	"\x05since\x18\a \x01(\x03H\x05R\x05since\x88\x01\x01\x12F\n" +
+	"\x1dmin_affected_population_count\x18\b \x01(\x03H\x06R\x1aminAffectedPopulationCount\x88\x01\x01B\a\n" +
 	"\x05_typeB\x10\n" +
 	"\x0e_min_magnitudeB\x0e\n" +
 	"\f_alert_levelB\x12\n" +
 	"\x10_min_alert_levelB\x0f\n" +
-	"\r_discord_sent\"M\n" +
+	"\r_discord_sentB\b\n" +
+	"\x06_sinceB \n" +
+	"\x1e_min_affected_population_count\"M\n" +
 	"\x15ListDisastersResponse\x124\n" +
 	"\tdisasters\x18\x01 \x03(\v2\x16.disasters.v1.DisasterR\tdisasters\"\xbd\x02\n" +
 	"\x16StreamDisastersRequest\x123\n" +

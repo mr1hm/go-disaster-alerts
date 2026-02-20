@@ -158,6 +158,10 @@ func (s *SQLiteDB) ListDisasters(ctx context.Context, opts Filter) ([]models.Dis
 		conditions = append(conditions, "discord_sent = ?")
 		args = append(args, *opts.DiscordSent)
 	}
+	if opts.MinAffectedPopulationCount != nil {
+		conditions = append(conditions, "affected_population_count >= ?")
+		args = append(args, *opts.MinAffectedPopulationCount)
+	}
 
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")

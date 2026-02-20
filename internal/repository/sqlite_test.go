@@ -192,9 +192,9 @@ func TestSQLiteDB_NewFields(t *testing.T) {
 		Latitude:   -20.0,
 		Longitude:  45.0,
 		Timestamp:  time.Now(),
-		Country:    "Madagascar",
-		Population: "1.5 million affected",
-		ReportURL:  "https://www.gdacs.org/report.aspx?eventtype=TC&eventid=123",
+		Country:            "Madagascar",
+		AffectedPopulation: "1.5 million affected",
+		ReportURL:          "https://www.gdacs.org/report.aspx?eventtype=TC&eventid=123",
 		CreatedAt:  time.Now(),
 	}
 
@@ -211,8 +211,8 @@ func TestSQLiteDB_NewFields(t *testing.T) {
 	if got.Country != "Madagascar" {
 		t.Errorf("expected country 'Madagascar', got '%s'", got.Country)
 	}
-	if got.Population != "1.5 million affected" {
-		t.Errorf("expected population '1.5 million affected', got '%s'", got.Population)
+	if got.AffectedPopulation != "1.5 million affected" {
+		t.Errorf("expected affected_population '1.5 million affected', got '%s'", got.AffectedPopulation)
 	}
 	if got.ReportURL != "https://www.gdacs.org/report.aspx?eventtype=TC&eventid=123" {
 		t.Errorf("expected report_url, got '%s'", got.ReportURL)

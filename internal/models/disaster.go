@@ -17,9 +17,10 @@ type Disaster struct {
 	Latitude    float64
 	Longitude   float64
 	Timestamp   time.Time // when the event occurred
-	Country     string    // Country where disaster occurred
-	Population  string    // Affected population (e.g., "1 thousand (in MMI>=VII)")
-	ReportURL   string    // Link to detailed report
+	Country                 string // Country where disaster occurred
+	AffectedPopulation      string // Affected population text (e.g., "1 thousand (in MMI>=VII)")
+	AffectedPopulationCount int64  // Numeric population value for filtering
+	ReportURL               string // Link to detailed report
 	Raw         []byte    // original JSON/XML for debugging
 	CreatedAt   time.Time // when we ingested it
 }

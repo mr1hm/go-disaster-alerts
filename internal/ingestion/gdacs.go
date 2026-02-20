@@ -20,18 +20,23 @@ type gdacsRSS struct {
 type gdacsChannel struct {
 	Items []gdacsItem `xml:"item"`
 }
+type populationData struct {
+	Value int64  `xml:"value,attr"` // numeric population count
+	Text  string `xml:",chardata"`  // text description
+}
+
 type gdacsItem struct {
-	Title       string `xml:"title"`
-	Description string `xml:"description"`
-	Link        string `xml:"link"`
-	PubDate     string `xml:"pubDate"`
-	Point       string `xml:"point"`      // "lat lon" format from georss:point
-	EventType   string `xml:"eventtype"`  // gdacs:eventtype
-	AlertLevel  string `xml:"alertlevel"` // gdacs:alertlevel
-	EventID     string `xml:"eventid"`    // gdacs:eventid
-	Severity    string `xml:"severity"`   // gdacs:severity - e.g. "Magnitude 5.6M, Depth:56.4km"
-	Country     string `xml:"country"`    // gdacs:country
-	Population  string `xml:"population"` // gdacs:population - e.g. "1 thousand (in MMI>=VII)"
+	Title       string         `xml:"title"`
+	Description string         `xml:"description"`
+	Link        string         `xml:"link"`
+	PubDate     string         `xml:"pubDate"`
+	Point       string         `xml:"point"`      // "lat lon" format from georss:point
+	EventType   string         `xml:"eventtype"`  // gdacs:eventtype
+	AlertLevel  string         `xml:"alertlevel"` // gdacs:alertlevel
+	EventID     string         `xml:"eventid"`    // gdacs:eventid
+	Severity    string         `xml:"severity"`   // gdacs:severity - e.g. "Magnitude 5.6M, Depth:56.4km"
+	Country     string         `xml:"country"`    // gdacs:country
+	Population  populationData `xml:"population"` // gdacs:population with value attribute and text
 }
 
 func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster, error) {
@@ -79,20 +84,21 @@ func (m *Manager) pollGDACS(ctx context.Context, url string) ([]*models.Disaster
 		}
 
 		d := &models.Disaster{
-			ID:          "gdacs_" + item.EventID,
-			Source:      "GDACS",
-			Type:        disasterType,
-			Title:       item.Title,
-			Description: item.Description,
-			Magnitude:   parseSeverity(item.Severity),
-			AlertLevel:  mapGDACSAlertLevel(item.AlertLevel),
-			Latitude:    lat,
-			Longitude:   lon,
-			Timestamp:   timestamp,
-			Country:     item.Country,
-			Population:  item.Population,
-			ReportURL:   item.Link,
-			CreatedAt:   time.Now(),
+			ID:              "gdacs_" + item.EventID,
+			Source:          "GDACS",
+			Type:            disasterType,
+			Title:           item.Title,
+			Description:     item.Description,
+			Magnitude:       parseSeverity(item.Severity),
+			AlertLevel:      mapGDACSAlertLevel(item.AlertLevel),
+			Latitude:        lat,
+			Longitude:       lon,
+			Timestamp:       timestamp,
+			Country:         item.Country,
+			AffectedPopulation:      strings.TrimSpace(item.Population.Text),
+			AffectedPopulationCount: item.Population.Value,
+			ReportURL:       item.Link,
+			CreatedAt:       time.Now(),
 		}
 		disasters = append(disasters, d)
 	}
@@ -112,6 +118,7 @@ func parseSeverity(severity string) float64 {
 	}
 	return 0
 }
+
 
 func mapGDACSEventType(eventType string) disastersv1.DisasterType {
 	switch strings.ToUpper(eventType) {

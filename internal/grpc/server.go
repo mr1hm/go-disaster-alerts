@@ -157,17 +157,18 @@ func (s *Server) AcknowledgeDisasters(ctx context.Context, req *disastersv1.Ackn
 
 func toProto(d *models.Disaster) *disastersv1.Disaster {
 	return &disastersv1.Disaster{
-		Id:         d.ID,
-		Source:     d.Source,
-		Type:       d.Type,
-		Title:      d.Title,
-		Magnitude:  d.Magnitude,
-		AlertLevel: d.AlertLevel,
-		Latitude:   d.Latitude,
-		Longitude:  d.Longitude,
-		Timestamp:  d.Timestamp.Unix(),
-		Country:    d.Country,
-		Population: d.Population,
-		ReportUrl:  d.ReportURL,
+		Id:                      d.ID,
+		Source:                  d.Source,
+		Type:                    d.Type,
+		Title:                   d.Title,
+		Magnitude:               d.Magnitude,
+		AlertLevel:              d.AlertLevel,
+		Latitude:                d.Latitude,
+		Longitude:               d.Longitude,
+		Timestamp:               d.Timestamp.Unix(),
+		Country:                 d.Country,
+		AffectedPopulation:      d.AffectedPopulation,
+		AffectedPopulationCount: d.AffectedPopulationCount,
+		ReportUrl:               d.ReportURL,
 	}
 }

@@ -43,7 +43,7 @@ func (m *Manager) Start(ctx context.Context) {
 			m.broadcaster.Broadcast(disaster)
 		}
 
-		slog.Info("added disaster", "id", disaster.ID, "type", disaster.Type, "source", disaster.Source, "alert_level", disaster.AlertLevel, "country", disaster.Country, "population", disaster.Population)
+		slog.Info("added disaster", "id", disaster.ID, "type", disaster.Type, "source", disaster.Source, "alert_level", disaster.AlertLevel, "country", disaster.Country, "affected_population_count", disaster.AffectedPopulationCount)
 		return nil
 	}
 

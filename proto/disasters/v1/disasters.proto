@@ -55,8 +55,9 @@ message Disaster {
     double longitude = 8;
     int64 timestamp = 9;
     string country = 10;
-    string population = 11;
+    string affected_population = 11;       // Text description (e.g., "1 thousand (in MMI>=VII)")
     string report_url = 12;
+    int64 affected_population_count = 13;  // Numeric population value for filtering
 }
 
 message ListDisastersRequest {
